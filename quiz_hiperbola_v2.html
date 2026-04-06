@@ -1,0 +1,1685 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hipérbola — Curso Interactivo Completo</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d0f1a;--surface:#141628;--surface2:#1c1f35;--surface3:#232644;
+  --accent:#6c63ff;--accent2:#ff6b9d;--accent3:#00d4aa;--accent4:#ffd166;
+  --text:#e8eaf6;--text2:#9ba3cc;--text3:#5a6080;
+  --correct:#00d4aa;--wrong:#ff4757;--reveal:#3a3d5c;
+  --border:#2a2d4a;--glow:rgba(108,99,255,0.3);
+  --r:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Space Grotesk',sans-serif;
+  background:var(--bg);color:var(--text);
+  min-height:100vh;padding:16px;
+  background-image:
+    radial-gradient(ellipse at 20% 20%, rgba(108,99,255,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 80%, rgba(0,212,170,0.05) 0%, transparent 50%);
+}
+#app{max-width:760px;margin:0 auto}
+
+/* HEADER */
+.header{
+  text-align:center;padding:32px 20px 24px;
+  position:relative;overflow:hidden;
+}
+.header::before{
+  content:'';position:absolute;top:-40px;left:50%;transform:translateX(-50%);
+  width:300px;height:300px;border-radius:50%;
+  background:radial-gradient(circle, rgba(108,99,255,0.15) 0%, transparent 70%);
+  pointer-events:none;
+}
+.logo{font-size:42px;margin-bottom:8px;filter:drop-shadow(0 0 20px rgba(108,99,255,0.6))}
+h1{font-size:28px;font-weight:700;letter-spacing:-0.5px;
+   background:linear-gradient(135deg,#a78bfa,#60a5fa,#34d399);
+   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.subtitle{color:var(--text2);font-size:14px;margin-top:6px}
+
+/* TABS / MODES */
+.mode-tabs{
+  display:flex;gap:8px;margin:20px 0 16px;
+  background:var(--surface);border-radius:14px;padding:6px;
+  border:1px solid var(--border);
+}
+.mode-tab{
+  flex:1;padding:10px 8px;border:none;border-radius:10px;
+  font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;
+  color:var(--text2);background:transparent;transition:all .2s;
+}
+.mode-tab.active{background:var(--accent);color:#fff;box-shadow:0 4px 14px rgba(108,99,255,0.4)}
+.mode-tab:hover:not(.active){background:var(--surface2);color:var(--text)}
+
+/* PROGRESS */
+.progress-wrap{margin:12px 0}
+.progress-bar{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;border-radius:3px;transition:width .4s cubic-bezier(.4,0,.2,1);
+  background:linear-gradient(90deg,var(--accent),var(--accent3))}
+.progress-info{display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-top:5px}
+
+/* STATS ROW */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.stat-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);padding:12px;text-align:center;
+}
+.stat-card .val{font-size:22px;font-weight:700;line-height:1}
+.stat-card .lbl{font-size:11px;color:var(--text2);margin-top:3px}
+.stat-card.green .val{color:var(--correct)}
+.stat-card.red .val{color:var(--wrong)}
+.stat-card.yellow .val{color:var(--accent4)}
+
+/* FILTER ROW */
+.filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.filter-btn{
+  padding:6px 14px;border-radius:20px;
+  border:1.5px solid var(--border);
+  font-size:12px;font-weight:600;cursor:pointer;
+  background:var(--surface);color:var(--text2);
+  font-family:inherit;transition:all .2s;
+}
+.filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.filter-btn:hover:not(.active){border-color:var(--accent);color:var(--text)}
+
+/* QUESTION CARD */
+.question-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:20px;padding:24px;margin-bottom:16px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.3);
+  animation:slideIn .3s ease;
+}
+@keyframes slideIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+.q-meta{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.badge{
+  padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;
+  letter-spacing:.5px;text-transform:uppercase;
+}
+.b-calc{background:rgba(0,212,170,0.15);color:var(--accent3);border:1px solid rgba(0,212,170,0.3)}
+.b-graph{background:rgba(96,165,250,0.15);color:#60a5fa;border:1px solid rgba(96,165,250,0.3)}
+.b-conc{background:rgba(108,99,255,0.15);color:#a78bfa;border:1px solid rgba(108,99,255,0.3)}
+.b-fact{background:rgba(255,209,102,0.15);color:var(--accent4);border:1px solid rgba(255,209,102,0.3)}
+.b-hard{background:rgba(255,71,87,0.15);color:#ff6b6b;border:1px solid rgba(255,71,87,0.3)}
+
+.q-num{font-size:12px;color:var(--text3);font-weight:600}
+.diff-dots{display:flex;gap:3px;align-items:center}
+.diff-dot{width:7px;height:7px;border-radius:50%;background:var(--border)}
+.diff-dot.filled{background:var(--accent4)}
+
+.q-text{font-size:17px;line-height:1.6;font-weight:500;color:var(--text);margin-bottom:14px}
+.q-formula{
+  background:rgba(108,99,255,0.08);border-radius:10px;
+  padding:12px 16px;font-family:'JetBrains Mono',monospace;
+  font-size:14px;color:#a78bfa;
+  border-left:3px solid var(--accent);margin-bottom:14px;
+  border:1px solid rgba(108,99,255,0.2);
+}
+
+/* GRAPH CONTAINER */
+.graph-container{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:14px;padding:8px;margin-bottom:16px;
+  text-align:center;position:relative;
+}
+.graph-controls{
+  display:flex;gap:8px;justify-content:center;flex-wrap:wrap;
+  margin-top:8px;
+}
+.graph-btn{
+  padding:5px 12px;font-size:12px;font-weight:600;
+  border:1px solid var(--border);border-radius:8px;
+  background:var(--surface);color:var(--text2);cursor:pointer;
+  font-family:inherit;transition:all .15s;
+}
+.graph-btn:hover{background:var(--surface3);color:var(--text);border-color:var(--accent)}
+.graph-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+canvas{border-radius:10px;display:block;margin:0 auto}
+
+/* OPTIONS */
+.options{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+@media(max-width:500px){.options{grid-template-columns:1fr}}
+.options-1col{grid-template-columns:1fr!important}
+
+.opt{
+  padding:12px 16px;border:1.5px solid var(--border);border-radius:12px;
+  cursor:pointer;font-size:14px;text-align:left;background:var(--surface2);
+  color:var(--text);transition:all .15s;font-family:inherit;
+  display:flex;align-items:flex-start;gap:10px;line-height:1.5;
+}
+.opt-letter{
+  width:24px;height:24px;min-width:24px;border-radius:6px;
+  background:var(--surface3);color:var(--text2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;
+}
+.opt:hover:not(:disabled){
+  border-color:var(--accent);background:rgba(108,99,255,0.08);
+  transform:translateY(-1px);box-shadow:0 4px 16px var(--glow);
+}
+.opt:hover:not(:disabled) .opt-letter{background:var(--accent);color:#fff}
+.opt.correct{
+  border-color:var(--correct);background:rgba(0,212,170,0.08);
+  animation:popIn .3s ease;
+}
+.opt.correct .opt-letter{background:var(--correct);color:#fff}
+.opt.wrong{border-color:var(--wrong);background:rgba(255,71,87,0.08)}
+.opt.wrong .opt-letter{background:var(--wrong);color:#fff}
+.opt.reveal{border-color:var(--reveal);color:var(--text3)}
+.opt:disabled{cursor:default;transform:none!important}
+@keyframes popIn{0%{transform:scale(0.97)}50%{transform:scale(1.02)}100%{transform:scale(1)}}
+
+/* EXPLANATION */
+.explanation{
+  margin-top:16px;background:rgba(0,212,170,0.06);
+  border-radius:12px;padding:16px;font-size:14px;line-height:1.7;
+  display:none;border:1px solid rgba(0,212,170,0.2);
+  animation:slideIn .3s ease;
+}
+.exp-header{
+  display:flex;align-items:center;gap:8px;
+  font-weight:700;margin-bottom:10px;font-size:14px;
+}
+.exp-wrong{background:rgba(255,71,87,0.06);border-color:rgba(255,71,87,0.2)}
+.exp-wrong .exp-header{color:#ff6b6b}
+.exp-right .exp-header{color:var(--correct)}
+.exp-detail{color:var(--text2)}
+.exp-formula{
+  font-family:'JetBrains Mono',monospace;font-size:13px;
+  background:var(--surface2);border-radius:8px;padding:8px 12px;
+  margin-top:8px;color:var(--accent4);
+}
+
+/* HINT BOX */
+.hint-box{
+  background:rgba(255,209,102,0.06);border:1px solid rgba(255,209,102,0.2);
+  border-radius:10px;padding:12px 14px;font-size:13px;color:var(--text2);
+  margin-bottom:14px;display:none;animation:slideIn .3s;
+}
+.hint-box.visible{display:block}
+
+/* NAV ROW */
+.nav-row{
+  display:flex;gap:8px;margin-top:16px;align-items:center;flex-wrap:wrap;
+}
+button{
+  padding:10px 20px;border:1.5px solid var(--border);border-radius:12px;
+  background:var(--surface2);cursor:pointer;font-size:14px;font-weight:600;
+  color:var(--text);transition:all .2s;font-family:inherit;
+}
+button:hover:not(:disabled){
+  border-color:var(--accent);color:var(--accent);background:rgba(108,99,255,0.08);
+}
+button:disabled{opacity:.4;cursor:default}
+button.primary{
+  background:linear-gradient(135deg,var(--accent),#8b5cf6);
+  color:#fff;border-color:transparent;
+  box-shadow:0 4px 16px rgba(108,99,255,0.4);
+}
+button.primary:hover:not(:disabled){
+  box-shadow:0 6px 24px rgba(108,99,255,0.6);
+  transform:translateY(-1px);color:#fff;border-color:transparent;
+  background:linear-gradient(135deg,#7c73ff,#9c6fff);
+}
+.btn-hint{font-size:12px;padding:8px 14px;color:var(--accent4);border-color:rgba(255,209,102,0.3)}
+.btn-hint:hover:not(:disabled){background:rgba(255,209,102,0.08);border-color:var(--accent4);color:var(--accent4)}
+
+/* HARD QUESTION TYPES */
+.drag-area{
+  min-height:80px;background:var(--surface2);border:2px dashed var(--border);
+  border-radius:12px;padding:12px;display:flex;flex-wrap:wrap;
+  align-items:flex-start;gap:8px;margin-top:10px;transition:border-color .2s;
+}
+.drag-area.over{border-color:var(--accent);background:rgba(108,99,255,0.05)}
+.drag-area.filled{border-color:var(--correct);border-style:solid}
+.drag-piece{
+  padding:8px 14px;background:var(--surface3);border:1.5px solid var(--border);
+  border-radius:10px;cursor:grab;font-family:'JetBrains Mono',monospace;
+  font-size:14px;font-weight:600;color:var(--accent);
+  user-select:none;transition:all .15s;
+}
+.drag-piece:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 4px 12px var(--glow)}
+.drag-piece:active{cursor:grabbing}
+.drag-piece.dragging{opacity:.5}
+.drag-piece.placed{background:rgba(108,99,255,0.1);border-color:var(--accent)}
+
+.fill-blank{
+  display:inline-block;min-width:80px;height:32px;
+  border-bottom:2px solid var(--accent3);background:rgba(0,212,170,0.05);
+  border-radius:4px 4px 0 0;padding:0 8px;
+  font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;
+  color:var(--text);text-align:center;vertical-align:middle;
+  outline:none;border-top:none;border-left:none;border-right:none;
+  transition:border-color .2s;
+}
+.fill-blank:focus{border-color:var(--accent);background:rgba(108,99,255,0.08)}
+.fill-blank.correct-fill{border-color:var(--correct);background:rgba(0,212,170,0.1);color:var(--correct)}
+.fill-blank.wrong-fill{border-color:var(--wrong);background:rgba(255,71,87,0.1);color:var(--wrong)}
+
+.step-exercise{counter-reset:step}
+.step{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:14px;background:var(--surface2);border-radius:12px;
+  margin-bottom:10px;border:1px solid var(--border);
+}
+.step-num{
+  width:28px;height:28px;min-width:28px;border-radius:8px;
+  background:var(--accent);color:#fff;font-weight:700;font-size:13px;
+  display:flex;align-items:center;justify-content:center;
+}
+.step-content{flex:1;font-size:14px;line-height:1.7;color:var(--text2)}
+.step-content strong{color:var(--text)}
+
+/* RESULT SCREEN */
+.result-screen{
+  text-align:center;padding:40px 20px;animation:slideIn .4s ease;
+}
+.result-emoji{font-size:64px;margin-bottom:16px;filter:drop-shadow(0 0 20px rgba(255,209,102,0.5))}
+.result-score{
+  font-size:72px;font-weight:700;line-height:1;
+  background:linear-gradient(135deg,var(--accent4),var(--accent));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.result-msg{font-size:16px;color:var(--text2);margin:12px 0 28px}
+.result-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
+  max-width:340px;margin:0 auto 28px;
+}
+.result-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+/* TOPIC INTRO SCREEN */
+.topic-screen{animation:slideIn .35s ease}
+.topic-hero{
+  background:linear-gradient(135deg,rgba(108,99,255,0.15),rgba(0,212,170,0.08));
+  border:1px solid rgba(108,99,255,0.2);border-radius:20px;
+  padding:28px;margin-bottom:20px;
+}
+.topic-hero h2{font-size:22px;font-weight:700;margin-bottom:8px;color:var(--text)}
+.topic-hero p{color:var(--text2);font-size:14px;line-height:1.7}
+.topic-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;padding:20px;margin-bottom:12px;cursor:pointer;
+  transition:all .2s;display:flex;align-items:center;gap:16px;
+}
+.topic-card:hover{border-color:var(--accent);transform:translateX(4px);box-shadow:0 4px 20px var(--glow)}
+.topic-icon{font-size:28px;min-width:48px;text-align:center}
+.topic-info h3{font-size:15px;font-weight:600;margin-bottom:4px}
+.topic-info p{font-size:12px;color:var(--text2)}
+.topic-count{
+  margin-left:auto;background:var(--surface2);
+  border-radius:20px;padding:4px 12px;font-size:12px;
+  font-weight:700;color:var(--accent);border:1px solid rgba(108,99,255,0.2);
+  white-space:nowrap;
+}
+
+/* EXAMPLE WALKTHROUGH */
+.walkthrough{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:20px;overflow:hidden;
+}
+.wt-header{
+  background:linear-gradient(135deg,rgba(108,99,255,0.2),rgba(0,212,170,0.1));
+  padding:20px 24px;border-bottom:1px solid var(--border);
+}
+.wt-header h2{font-size:18px;font-weight:700}
+.wt-header p{color:var(--text2);font-size:13px;margin-top:4px}
+.wt-body{padding:20px 24px}
+.wt-step{
+  border-left:3px solid var(--border);padding-left:18px;
+  margin-bottom:20px;position:relative;
+}
+.wt-step.active{border-color:var(--accent)}
+.wt-step-title{font-weight:700;font-size:15px;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.wt-step-icon{font-size:16px}
+.wt-step-body{color:var(--text2);font-size:14px;line-height:1.7}
+.wt-formula{
+  font-family:'JetBrains Mono',monospace;font-size:13px;
+  background:var(--surface2);border-radius:8px;padding:10px 14px;
+  margin:8px 0;color:var(--accent4);border:1px solid var(--border);
+}
+.wt-nav{padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:space-between;align-items:center}
+.wt-dots{display:flex;gap:6px}
+.wt-dot{width:8px;height:8px;border-radius:50%;background:var(--border);cursor:pointer;transition:all .2s}
+.wt-dot.active{background:var(--accent);width:24px;border-radius:4px}
+
+/* TOAST */
+.toast{
+  position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:12px;padding:12px 20px;font-size:14px;font-weight:600;
+  z-index:999;transition:transform .35s cubic-bezier(.4,0,.2,1);
+  box-shadow:0 8px 32px rgba(0,0,0,0.4);
+  display:flex;align-items:center;gap:8px;max-width:340px;text-align:center;
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.ok{border-color:var(--correct);color:var(--correct)}
+.toast.err{border-color:var(--wrong);color:var(--wrong)}
+
+/* SOUND INDICATOR */
+.sound-btn{
+  position:fixed;bottom:20px;right:20px;
+  width:44px;height:44px;border-radius:50%;
+  background:var(--surface2);border:1px solid var(--border);
+  font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  z-index:100;box-shadow:0 4px 16px rgba(0,0,0,0.3);transition:all .2s;
+  padding:0;
+}
+.sound-btn:hover{border-color:var(--accent);transform:scale(1.1)}
+
+/* RESPONSIVE */
+@media(max-width:480px){
+  h1{font-size:22px}.q-text{font-size:15px}
+  .opt{font-size:13px}.stats-row{grid-template-columns:1fr 1fr 1fr}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<button class="sound-btn" id="soundBtn" onclick="toggleSound()" title="Sonido">🔊</button>
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+// AUDIO ENGINE (Web Audio API)
+// ═══════════════════════════════════════════════
+let audioCtx=null,soundOn=true;
+function getAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function playTone(freq,dur,type='sine',vol=0.3){
+  if(!soundOn)return;
+  try{
+    const a=getAudio();
+    const osc=a.createOscillator();const gain=a.createGain();
+    osc.connect(gain);gain.connect(a.destination);
+    osc.type=type;osc.frequency.value=freq;
+    gain.gain.setValueAtTime(vol,a.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001,a.currentTime+dur);
+    osc.start();osc.stop(a.currentTime+dur);
+  }catch(e){}
+}
+function playCorrect(){
+  playTone(523,0.12,'sine',0.2);
+  setTimeout(()=>playTone(659,0.12,'sine',0.2),80);
+  setTimeout(()=>playTone(784,0.2,'sine',0.25),160);
+}
+function playWrong(){
+  playTone(220,0.12,'sawtooth',0.15);
+  setTimeout(()=>playTone(196,0.25,'sawtooth',0.15),100);
+}
+function playClick(){playTone(440,0.05,'sine',0.1);}
+function playNav(){playTone(330,0.07,'sine',0.08);}
+function playFinish(){
+  [523,659,784,1046].forEach((f,i)=>setTimeout(()=>playTone(f,0.2,'sine',0.2),i*100));
+}
+function toggleSound(){
+  soundOn=!soundOn;
+  document.getElementById('soundBtn').textContent=soundOn?'🔊':'🔇';
+  showToast(soundOn?'🔊 Sonido activado':'🔇 Sonido desactivado','ok');
+}
+
+function showToast(msg,type='ok',dur=2200){
+  const t=document.getElementById('toast');
+  t.innerHTML=msg;t.className='toast '+type;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),dur);
+}
+
+// ═══════════════════════════════════════════════
+// ALL QUESTIONS BANK
+// ═══════════════════════════════════════════════
+const ALL_Q = [
+  // ——— CONCEPTOS ———
+  {t:"conc",diff:1,q:"¿Cuál es la definición exacta de hipérbola?",f:null,
+   opts:["Lugar geométrico de puntos cuya diferencia de distancias a dos focos es constante (2a)","Lugar geométrico de puntos equidistantes a un foco y una directriz","Lugar geométrico de puntos cuya suma de distancias a dos focos es constante","Sección cónica formada al cortar un cono paralelo a la base"],ans:0,
+   hint:"Piensa: elipse usa SUMA de distancias; hipérbola usa...",
+   exp:"La hipérbola se define como el conjunto de puntos P donde |PF₁ − PF₂| = 2a. La DIFERENCIA (no suma) de distancias a los focos es constante. Esto la diferencia de la elipse.",
+   formula_exp:"|PF₁ − PF₂| = 2a (constante)"},
+
+  {t:"conc",diff:1,q:"En x²/a² − y²/b² = 1, ¿qué son los vértices?",f:"x²/a² − y²/b² = 1",
+   opts:["Puntos (±a, 0) — donde la curva cruza el eje x","Puntos (0, ±b)","Puntos (±c, 0) — los focos","Puntos (±a, ±b)"],ans:0,
+   hint:"Los vértices están sobre el eje REAL de la hipérbola",
+   exp:"Los vértices son los puntos más cercanos al centro en cada rama. Para eje horizontal se ubican en (a,0) y (−a,0). No confundir con focos (±c,0) que están más afuera.",
+   formula_exp:"Vértices: (±a, 0) | Focos: (±c, 0) donde c > a"},
+
+  {t:"conc",diff:1,q:"La relación fundamental de la hipérbola es:",f:"c² = a² + b²",
+   opts:["c² = a² + b² (hipérbola, c > a)","c² = a² − b² (elipse)","c² = b² − a²","c = a + b"],ans:0,
+   hint:"En hipérbola c es el MAYOR de los tres valores",
+   exp:"¡Atención! En hipérbola: c² = a² + b², por lo tanto c > a. En elipse es al revés: c² = a² − b², y c < a. Esta diferencia es clave.",
+   formula_exp:"Hipérbola: c² = a² + b² ✓ | Elipse: c² = a² − b² ✗"},
+
+  {t:"conc",diff:1,q:"¿Cuál es la excentricidad de una hipérbola?",f:"e = c/a",
+   opts:["e > 1 (porque c > a)","e = 1 (parábola)","0 < e < 1 (elipse)","e = 0 (círculo)"],ans:0,
+   hint:"e = c/a. Como c > a en hipérbola, entonces e > ?",
+   exp:"Cada cónica tiene su rango de excentricidad: Círculo e=0, Elipse 0<e<1, Parábola e=1, Hipérbola e>1. Para hipérbola, como c>a, entonces e=c/a>1.",
+   formula_exp:"e = c/a > 1 siempre en hipérbola"},
+
+  {t:"conc",diff:1,q:"Las asíntotas de x²/a² − y²/b² = 1 son:",f:"x²/a² − y²/b² = 1",
+   opts:["y = ±(b/a)x — rectas por el origen","y = ±(a/b)x","y = ±ax","y = ±bx"],ans:0,
+   hint:"Recuerda: b va sobre a (b/a), no al revés",
+   exp:"Las asíntotas son y = ±(b/a)x. Son las diagonales del rectángulo auxiliar de lados 2a×2b. La hipérbola se acerca infinitamente pero NUNCA toca sus asíntotas.",
+   formula_exp:"y = ±(b/a)·x — pasan por el origen (0,0)"},
+
+  {t:"conc",diff:2,q:"¿Qué es el eje conjugado de una hipérbola?",f:null,
+   opts:["Segmento de longitud 2b, perpendicular al eje real en el centro","El segmento entre los dos focos (longitud 2c)","El segmento entre los dos vértices (longitud 2a)","La distancia de un vértice a su foco"],ans:0,
+   hint:"El eje conjugado NO pasa por los vértices de la curva",
+   exp:"El eje conjugado tiene longitud 2b y sus extremos son (0,b) y (0,−b). No pertenece a la curva, pero junto con el eje real forma el rectángulo auxiliar para trazar las asíntotas.",
+   formula_exp:"Eje real: 2a (horizontal) | Eje conjugado: 2b (vertical)"},
+
+  {t:"conc",diff:2,q:"y²/a² − x²/b² = 1 es una hipérbola con:",f:"y²/a² − x²/b² = 1",
+   opts:["Eje real VERTICAL — ramas arriba/abajo","Eje real HORIZONTAL — ramas derecha/izquierda","Eje diagonal — ramas en 45°","No es una hipérbola válida"],ans:0,
+   hint:"El término con signo POSITIVO indica la dirección del eje real",
+   exp:"Regla: el término positivo determina el eje real. Si y² es positivo → eje vertical → ramas abren arriba/abajo, vértices en (0,±a), focos en (0,±c).",
+   formula_exp:"y² positivo → eje vertical | x² positivo → eje horizontal"},
+
+  {t:"conc",diff:2,q:"El lado recto (LR) de la hipérbola es:",f:"LR = 2b²/a",
+   opts:["LR = 2b²/a — cuerda focal perpendicular al eje","LR = 2a²/b","LR = 2ab","LR = b²/a"],ans:0,
+   hint:"Es la cuerda que pasa por un foco, perpendicular al eje real",
+   exp:"El lado recto es la cuerda de la hipérbola que pasa por un foco y es perpendicular al eje real. Su longitud es LR = 2b²/a. Para x²/4 − y²/9 = 1: LR = 2(9)/2 = 9.",
+   formula_exp:"LR = 2b²/a"},
+
+  {t:"conc",diff:2,q:"¿Qué es una hipérbola equilátera (rectangular)?",f:"x² − y² = a²",
+   opts:["a = b, asíntotas perpendiculares (y = ±x), e = √2","a = c, asíntotas a 45°","e = √2/2, como la elipse","b = c, forma especial"],ans:0,
+   hint:"'Equilátera' significa que los dos ejes son iguales",
+   exp:"Hipérbola equilátera: a = b, lo que hace que las asíntotas sean y = ±x (perpendiculares entre sí). Su excentricidad siempre es e = √2 ≈ 1.414.",
+   formula_exp:"a = b → asíntotas: y = ±x → e = √2"},
+
+  {t:"conc",diff:1,q:"¿Cuántas ramas tiene una hipérbola?",f:null,
+   opts:["Exactamente DOS ramas separadas","Una sola rama continua como la parábola","Cuatro ramas en diagonal","Varía según los valores de a y b"],ans:0,
+   hint:"La hipérbola no es una curva continua como la elipse",
+   exp:"La hipérbola SIEMPRE tiene exactamente DOS ramas, una por cada lado del centro. Son simétricas respecto a ambos ejes y al centro. Esto la diferencia de la elipse (una curva cerrada).",
+   formula_exp:"2 ramas: una en x > a, otra en x < −a (para eje horizontal)"},
+
+  {t:"conc",diff:3,q:"¿Cuál es la propiedad reflexiva de la hipérbola?",f:null,
+   opts:["Un rayo hacia un foco se refleja hacia el otro foco","Un rayo paralelo al eje se refleja al foco","Un rayo perpendicular a asíntota llega al vértice","La tangente siempre es paralela a la asíntota"],ans:0,
+   hint:"Se aplica en telescopios tipo Cassegrain",
+   exp:"Propiedad reflexiva: cualquier rayo dirigido hacia un foco, al reflejarse en la hipérbola, parece provenir del otro foco. Esto se usa en telescopios Cassegrain donde el espejo secundario es hiperbólico.",
+   formula_exp:"Rayo → F₁ (virtual) ⟹ reflexión ⟹ F₂ (real)"},
+
+  {t:"conc",diff:2,q:"¿Cuál es la condición para que Ax² + Cy² + F = 0 sea hipérbola real?",f:null,
+   opts:["A·C < 0 (signos opuestos) y F ≠ 0","A·C > 0 (mismo signo)","A = 0 o C = 0","A = C (coeficientes iguales)"],ans:0,
+   hint:"Los términos de x² e y² deben tener signos CONTRARIOS",
+   exp:"La condición discriminante A·C < 0 garantiza hipérbola: los coeficientes de x² e y² tienen signos contrarios. Si F = 0, se obtiene hipérbola degenerada (dos rectas). Si A·C > 0 es elipse o círculo.",
+   formula_exp:"A·C < 0 → hipérbola | A·C > 0 → elipse | A·C = 0 → parábola"},
+
+  {t:"conc",diff:2,q:"Hipérbolas conjugadas son aquellas que:",f:null,
+   opts:["Comparten las mismas asíntotas y = ±(b/a)x","Tienen el mismo centro solamente","Solo tienen la misma excentricidad","Son idénticas rotadas 90°"],ans:0,
+   hint:"La clave está en las asíntotas — comparten algo especial",
+   exp:"Las hipérbolas conjugadas son: x²/a² − y²/b² = 1 y y²/b² − x²/a² = 1. Comparten exactamente las mismas asíntotas (y = ±(b/a)x) y el mismo centro, pero sus ejes reales son perpendiculares.",
+   formula_exp:"Conjugada de x²/a²−y²/b²=1 es y²/b²−x²/a²=1"},
+
+  // ——— CÁLCULO ———
+  {t:"calc",diff:1,q:"Identifica a, b y c en: x²/16 − y²/9 = 1",f:"x²/16 − y²/9 = 1",
+   opts:["a=4, b=3, c=5 (porque c²=16+9=25)","a=16, b=9, c=25","a=4, b=3, c=7","a=3, b=4, c=5"],ans:0,
+   hint:"a² es el denominador de x², no a mismo. Luego calcula c² = a² + b²",
+   exp:"Paso 1: a² = 16 → a = 4. Paso 2: b² = 9 → b = 3. Paso 3: c² = a² + b² = 16+9 = 25 → c = 5. Los focos son (±5, 0).",
+   formula_exp:"c² = 16 + 9 = 25 → c = 5 | Focos: (±5, 0)"},
+
+  {t:"calc",diff:1,q:"Para x²/25 − y²/144 = 1, calcula la excentricidad e.",f:"e = c/a",
+   opts:["e = 13/5 = 2.6","e = 13/12","e = 5/13","e = 12/5"],ans:0,
+   hint:"Primero calcula c con c² = 25 + 144, luego e = c/a",
+   exp:"a² = 25 → a = 5. b² = 144 → b = 12. c² = 25 + 144 = 169 → c = 13. e = c/a = 13/5 = 2.6.",
+   formula_exp:"c = 13, a = 5 → e = 13/5 = 2.6"},
+
+  {t:"calc",diff:1,q:"¿Cuáles son las asíntotas de x²/9 − y²/4 = 1?",f:"y = ±(b/a)x",
+   opts:["y = ±(2/3)x","y = ±(3/2)x","y = ±(4/9)x","y = ±(9/4)x"],ans:0,
+   hint:"Fórmula asíntotas: y = ±(b/a)x. Extrae a y b primero.",
+   exp:"a² = 9 → a = 3. b² = 4 → b = 2. Asíntotas: y = ±(b/a)x = ±(2/3)x. Pendiente positiva y negativa.",
+   formula_exp:"y = ±(2/3)x — dos rectas que se cruzan en el origen"},
+
+  {t:"calc",diff:2,q:"Convierte a forma estándar: 4x² − 9y² = 36",f:"4x² − 9y² = 36",
+   opts:["x²/9 − y²/4 = 1 (÷ entre 36)","x²/4 − y²/9 = 1","x²/36 − y²/36 = 1","Ya está en forma estándar"],ans:0,
+   hint:"Divide TODOS los términos entre 36 (el lado derecho)",
+   exp:"Para forma estándar el lado derecho debe ser 1. Dividir entre 36: 4x²/36 − 9y²/36 = 1 → x²/9 − y²/4 = 1. Ahora: a² = 9, b² = 4.",
+   formula_exp:"4x²−9y²=36 ÷ 36 → x²/9 − y²/4 = 1"},
+
+  {t:"calc",diff:2,q:"La hipérbola tiene vértices en (±6, 0) y c = 10. ¿Ecuación?",f:"c² = a² + b²",
+   opts:["x²/36 − y²/64 = 1","x²/100 − y²/64 = 1","x²/36 − y²/100 = 1","x²/64 − y²/36 = 1"],ans:0,
+   hint:"a = 6 (vértice), c = 10. Despeja b² = c² − a²",
+   exp:"a = 6 → a² = 36. c = 10 → c² = 100. b² = c² − a² = 100 − 36 = 64. Eje horizontal (vértices en x), ecuación: x²/36 − y²/64 = 1.",
+   formula_exp:"b² = c² − a² = 100 − 36 = 64 → x²/36 − y²/64 = 1"},
+
+  {t:"calc",diff:2,q:"Para y²/49 − x²/576 = 1, calcula c y la ubicación de los focos.",f:"c² = a² + b²",
+   opts:["c = 25; focos en (0, ±25)","c = 23; focos en (±23, 0)","c = 625","c = √625 = 25; focos en (±25, 0)"],ans:0,
+   hint:"Eje vertical (y² positivo) → focos están en el eje y",
+   exp:"a² = 49, b² = 576. c² = 49 + 576 = 625 → c = 25. Como el eje es vertical (y² positivo), los focos son (0, ±25).",
+   formula_exp:"c = 25 → Focos: (0, ±25) — eje vertical"},
+
+  {t:"calc",diff:2,q:"¿Qué representa x² − y² = 0?",f:"x² − y² = 0",
+   opts:["Hipérbola degenerada: dos rectas y = ±x","Hipérbola equilátera real","Un par de parábolas","Un punto en el origen"],ans:0,
+   hint:"Factoriza como diferencia de cuadrados: a² − b² = (a−b)(a+b)",
+   exp:"x² − y² = 0 → (x−y)(x+y) = 0 → x = y ó x = −y. Son dos rectas que se cruzan en el origen. Es la hipérbola degenerada (cuando se 'aplana' al punto de degenerar en asíntotas).",
+   formula_exp:"(x−y)(x+y) = 0 → y = x y y = −x"},
+
+  {t:"calc",diff:2,q:"La hipérbola 9x² − 16y² = 144 tiene focos en:",f:"9x² − 16y² = 144",
+   opts:["(±5, 0) — focos en eje x","(±4, 0)","(±3, 0)","(0, ±5)"],ans:0,
+   hint:"Primero divide entre 144 para forma estándar, luego calcula c",
+   exp:"÷144: x²/16 − y²/9 = 1. a² = 16 → a = 4, b² = 9 → b = 3. c² = 16+9 = 25 → c = 5. Eje horizontal → Focos en (±5, 0).",
+   formula_exp:"x²/16 − y²/9 = 1 → c = 5 → Focos (±5, 0)"},
+
+  {t:"calc",diff:3,q:"Hipérbola con asíntotas y = ±(3/2)x y vértices (±4, 0). ¿Ecuación?",f:"b/a = 3/2",
+   opts:["x²/16 − y²/36 = 1","x²/16 − y²/9 = 1","x²/4 − y²/9 = 1","x²/9 − y²/16 = 1"],ans:0,
+   hint:"a = 4 (del vértice). b/a = 3/2 → b = a × (3/2)",
+   exp:"a = 4 (vértice en x = ±4). Pendiente asíntota = b/a = 3/2 → b = 4 × (3/2) = 6. Ecuación: x²/16 − y²/36 = 1.",
+   formula_exp:"a=4, b=6 → x²/16 − y²/36 = 1"},
+
+  {t:"calc",diff:3,q:"(x−2)²/9 − (y+1)²/16 = 1 tiene focos en:",f:"c² = 9+16 = 25, c = 5",
+   opts:["(7,−1) y (−3,−1) — focos con centro desplazado","(2,−6) y (2,4)","(±5, 0) — sin considerar centro","(2±4, −1)"],ans:0,
+   hint:"Centro = (h,k) = (2,−1). Focos = (h±c, k) para eje horizontal",
+   exp:"Centro (h,k) = (2,−1). c² = 9+16 = 25 → c = 5. Eje horizontal → Focos: (h±c, k) = (2±5, −1) = (7,−1) y (−3,−1).",
+   formula_exp:"Centro (2,−1), c=5 → F₁(7,−1) y F₂(−3,−1)"},
+
+  {t:"calc",diff:3,q:"Para la hipérbola con e = √5/2 y a = 2, eje vertical. Calcula b.",f:"c = e·a",
+   opts:["b = 1 (c² − a² = 5 − 4 = 1)","b = √5","b = 2","b = 4"],ans:0,
+   hint:"Primero calcula c = e·a. Luego b² = c² − a² (eje vertical: a²+b²=c²)",
+   exp:"c = e·a = (√5/2)·2 = √5. b² = c² − a² = 5 − 4 = 1 → b = 1. Ecuación: y²/4 − x²/1 = 1.",
+   formula_exp:"c = √5, b² = c²−a² = 5−4 = 1 → b = 1"},
+
+  {t:"calc",diff:2,q:"¿Para qué valores de x existe la hipérbola x²/9 − y²/16 = 1?",f:"|x| ≥ a",
+   opts:["x ≤ −3 ó x ≥ 3 (fuera de los vértices)","x ≤ −4 ó x ≥ 4","Todos los reales","Solo x = ±3"],ans:0,
+   hint:"Despeja y². Para que y² ≥ 0, x²/9 debe ser ≥ 1",
+   exp:"y²/16 = x²/9 − 1 ≥ 0 → x²/9 ≥ 1 → x² ≥ 9 → |x| ≥ 3. Los puntos de la hipérbola existen solo fuera del intervalo (−3, 3).",
+   formula_exp:"|x| ≥ a = 3 → dos regiones: x ≤ −3 y x ≥ 3"},
+
+  {t:"calc",diff:3,q:"Identifica la cónica: 2x² − 3y² + 8x + 12y + 2 = 0",f:"A·C = 2·(−3) = −6 < 0",
+   opts:["Hipérbola (A·C = −6 < 0)","Elipse (A·C > 0)","Parábola (A·C = 0)","Círculo (A = C)"],ans:0,
+   hint:"A es el coef. de x², C el coef. de y². Calcula A·C",
+   exp:"A = 2 (coef. de x²), C = −3 (coef. de y²). A·C = 2·(−3) = −6 < 0. Esto confirma que es hipérbola. Para completar cuadrados: (x+2)²/? − (y−2)²/? = 1.",
+   formula_exp:"A·C = −6 < 0 → Hipérbola"},
+
+  {t:"calc",diff:2,q:"Calcula la distancia focal 2c de x²/16 − y²/9 = 1",f:"c² = a² + b²",
+   opts:["2c = 10","2c = 6","2c = 5","2c = 25"],ans:0,
+   hint:"c² = 16 + 9. Luego la distancia TOTAL entre focos es 2c",
+   exp:"c² = 16 + 9 = 25 → c = 5. La distancia focal (entre los dos focos) es 2c = 10.",
+   formula_exp:"c = 5 → Distancia entre focos = 2c = 10"},
+
+  // ——— FACTORIZACIÓN / ÁLGEBRA ———
+  {t:"fact",diff:1,q:"Obtén la forma estándar: 16x² − 25y² = 400",f:"16x² − 25y² = 400",
+   opts:["x²/25 − y²/16 = 1 (÷ 400)","x²/16 − y²/25 = 1","x²/400 − y²/400 = 1","16x² − 25y² = 400"],ans:0,
+   hint:"Divide todo entre 400 (el lado derecho). 16/400 = 1/25",
+   exp:"÷400: 16x²/400 − 25y²/400 = 1 → x²/25 − y²/16 = 1. Ahora a = 5, b = 4.",
+   formula_exp:"÷400: x²/25 − y²/16 = 1 → a=5, b=4"},
+
+  {t:"fact",diff:1,q:"Factoriza: x² − 9",f:"x² − 9",
+   opts:["(x−3)(x+3) — diferencia de cuadrados","(x−9)(x+1)","(x+3)²","x(x−9)"],ans:0,
+   hint:"Patrón: a² − b² = (a−b)(a+b). Aquí b = 3",
+   exp:"Diferencia de cuadrados: x² − 9 = x² − 3² = (x−3)(x+3). Las raíces son x = 3 y x = −3, que son los vértices de la hipérbola x² − 9 = 0 (intersección con eje x).",
+   formula_exp:"a² − b² = (a−b)(a+b)"},
+
+  {t:"fact",diff:2,q:"Factoriza completamente: 4x² − 36y²",f:"4x² − 36y²",
+   opts:["4(x−3y)(x+3y) — factor común + diferencia cuad.","4(x² − 9y²) — incompleto","(2x − 6y)²","2(2x² − 18y²)"],ans:0,
+   hint:"Primero saca el factor común, luego aplica diferencia de cuadrados",
+   exp:"Factor común 4: 4(x² − 9y²). Diferencia de cuadrados: 4(x−3y)(x+3y). Completamente factorizado.",
+   formula_exp:"4(x²−9y²) = 4(x−3y)(x+3y)"},
+
+  {t:"fact",diff:2,q:"Para (x+2)²/16 − (y−3)²/9 = 1, el centro es:",f:"(x−h)²/a² − (y−k)²/b² = 1",
+   opts:["(−2, 3) — cambio de signo en h","(2, −3)","(−2, −3)","(2, 3)"],ans:0,
+   hint:"El centro es (h,k) donde la forma es (x−h)²/a² − (y−k)²/b² = 1. Ojo con los signos.",
+   exp:"La forma es (x−(−2))²/16 − (y−3)²/9 = 1. Comparando con (x−h)²/a² − (y−k)²/b² = 1: h = −2, k = 3. Centro: (−2, 3).",
+   formula_exp:"Centro: (h, k) = (−2, 3)"},
+
+  {t:"fact",diff:2,q:"Identifica si 9x² − 4y² − 18x + 16y − 43 = 0 es hipérbola",f:"A·C = 9·(−4) < 0",
+   opts:["Sí, es hipérbola porque A·C = 9·(−4) = −36 < 0","No, A·C > 0","Es parábola (un coeficiente = 0)","Es círculo"],ans:0,
+   hint:"A = coef. de x², C = coef. de y². Evalúa el signo de A·C",
+   exp:"A = 9, C = −4. A·C = −36 < 0 → hipérbola. Para encontrar la forma estándar habría que completar el cuadrado: (x−1)²/4 − (y−2)²/9 = 1.",
+   formula_exp:"A·C = 9×(−4) = −36 < 0 → Hipérbola ✓"},
+
+  {t:"fact",diff:3,q:"Completa el cuadrado: x² − 4x − (y² + 6y) = 9",f:"Completar cuadrado en x e y",
+   opts:["(x−2)² − (y+3)² = 22","(x−2)² − (y+3)² = 9","(x+2)² − (y−3)² = 22","No se puede completar"],ans:0,
+   hint:"Suma los cuadrados al otro lado: (x−2)²=x²−4x+4, (y+3)²=y²+6y+9",
+   exp:"x²−4x → (x−2)² − 4. y²+6y → (y+3)² − 9. Sustituyendo: (x−2)² − 4 − (y+3)² + 9 = 9 → (x−2)² − (y+3)² = 4. a = b = 2, centro (2,−3).",
+   formula_exp:"(x−2)² − (y+3)² = 4 → x²/4 − y²/4 = 1 (trasladada)"},
+
+  // ——— GRÁFICAS ———
+  {t:"graph",diff:1,q:"En la gráfica de x²/4 − y²/9 = 1, ¿hacia dónde se abren las ramas?",f:"x²/4 − y²/9 = 1",
+   opts:["Derecha e izquierda (eje x es real)","Arriba y abajo (eje y es real)","En diagonal a 45°","En forma circular"],ans:0,
+   hint:"El término positivo indica la dirección de apertura",
+   exp:"Cuando x² tiene signo positivo, el eje real es el eje x → ramas abren hacia la derecha (x > a) e izquierda (x < −a). Vértices en (±2, 0).",
+   formula_exp:"x² positivo → abre izquierda/derecha | y² positivo → abre arriba/abajo"},
+
+  {t:"graph",diff:2,q:"Para trazar x²/9 − y²/4 = 1, el rectángulo auxiliar tiene vértices en:",f:null,
+   opts:["(±3, ±2) — de dimensiones 2a × 2b","(±2, ±3)","(±9, ±4)","(±√9, ±√4) = (±3, ±2) — es la misma"],ans:0,
+   hint:"a = √9 = 3, b = √4 = 2. El rectángulo va de ±a en x y ±b en y",
+   exp:"a = 3, b = 2. El rectángulo auxiliar tiene esquinas en (±3, ±2). Sus diagonales son exactamente las asíntotas y = ±(b/a)x = ±(2/3)x. La hipérbola toca el borde en (±3, 0).",
+   formula_exp:"Rectángulo: ±a en x, ±b en y → diagonales = asíntotas"},
+
+  {t:"graph",diff:2,q:"En y²/16 − x²/9 = 1, los vértices son:",f:"y²/16 − x²/9 = 1",
+   opts:["(0, ±4) — vértices en eje y","(±4, 0)","(0, ±3)","(±3, ±4)"],ans:0,
+   hint:"Eje vertical → vértices están en el eje y con y = ±a",
+   exp:"y² positivo → eje vertical. a² = 16 → a = 4. Los vértices son (0, ±4). Los focos serían (0, ±c) con c² = 16+9 = 25 → c = 5.",
+   formula_exp:"Vértices: (0, ±4) | Focos: (0, ±5)"},
+
+  {t:"graph",diff:2,q:"Las asíntotas de (y−3)²/4 − (x+1)²/5 = 1 son:",f:"Eje vertical, centro (−1,3)",
+   opts:["y−3 = ±(2/√5)(x+1) — asíntotas desplazadas","y−3 = ±(√5/2)(x+1)","y = ±(2/√5)x","y = ±(√5/2)x"],ans:0,
+   hint:"Para eje vertical, pendiente de asíntota = a/b. Centro en (h,k).",
+   exp:"Eje vertical (y² positivo): a² = 4 → a = 2, b² = 5 → b = √5. Pendiente = a/b = 2/√5. Centro (−1, 3). Asíntotas: y − 3 = ±(2/√5)(x + 1).",
+   formula_exp:"y−k = ±(a/b)(x−h) → y−3 = ±(2/√5)(x+1)"},
+
+  {t:"graph",diff:3,q:"Para 3x² − y² = 12, calcula vértices y focos.",f:"3x² − y² = 12",
+   opts:["Vértices (±2,0), Focos (±4,0)","Vértices (±4,0), Focos (±2,0)","Vértices (±2,0), Focos (±2√2,0)","Vértices (0,±2), Focos (0,±4)"],ans:0,
+   hint:"Divide entre 12 para forma estándar. a² = 12/3, b² = 12/1",
+   exp:"÷12: x²/4 − y²/12 = 1. a² = 4 → a = 2, b² = 12 → b = 2√3. c² = 4+12 = 16 → c = 4. Vértices (±2, 0), Focos (±4, 0).",
+   formula_exp:"x²/4 − y²/12 = 1 → a=2, b=2√3, c=4"},
+
+  {t:"graph",diff:1,q:"¿Cuántos puntos tiene la intersección de una hipérbola con sus asíntotas?",f:null,
+   opts:["NINGUNO — las asíntotas nunca tocan la curva","Exactamente dos puntos","Cuatro puntos","Depende de los valores"],ans:0,
+   hint:"La definición de asíntota implica que la curva se ACERCA pero...",
+   exp:"Las asíntotas NUNCA intersectan la hipérbola. Son límites que la curva se aproxima conforme x → ±∞, pero sin nunca alcanzarlos. La distancia entre la curva y la asíntota tiende a cero.",
+   formula_exp:"lím(x→∞) [distancia entre curva y asíntota] = 0"},
+
+  {t:"graph",diff:3,q:"La hipérbola equilátera xy = 6 tiene asíntotas en:",f:"xy = k",
+   opts:["Los ejes coordenados: x = 0 e y = 0","Las rectas y = ±x","Las rectas y = ±6","y = 6x y y = x/6"],ans:0,
+   hint:"xy = k es una hipérbola ROTADA 45°. Sus ejes de simetría son las bisectrices.",
+   exp:"xy = k es una hipérbola equilátera girada 45° respecto a los ejes estándar. Sus asíntotas son los propios ejes coordenados: x = 0 (eje y) e y = 0 (eje x). Sus ramas están en cuadrantes I y III (k > 0).",
+   formula_exp:"xy = k > 0 → cuadrantes I y III | xy = k < 0 → cuadrantes II y IV"},
+
+  // ——— APLICACIONES ———
+  {t:"calc",diff:3,q:"Trayectoria de cometa: x²/4 − y²/12 = 1 (UA). Calcula e.",f:"e = c/a",
+   opts:["e = 2 (órbita hiperbólica — cometa no vuelve)","e = √13/2","e = 4","e = 1/2 (órbita elíptica)"],ans:0,
+   hint:"c² = a² + b² = 4 + 12 = 16. Luego e = c/a",
+   exp:"a = 2, b = 2√3. c² = 4 + 12 = 16 → c = 4. e = 4/2 = 2. Como e > 1, el cometa sigue una trayectoria hiperbólica — pasa por el sistema solar y no regresa.",
+   formula_exp:"e = 2 > 1 → trayectoria hiperbólica abierta (cometa no regresa)"},
+
+  {t:"calc",diff:3,q:"Señales sísmicas llegan con diferencia de tiempo Δt = 0.006s a v = 5 km/s. Diferencia de distancias:",f:"d = v·t",
+   opts:["2a = 0.03 km = 30 m (epicentro en hipérbola)","2a = 0.06 km = 60 m","2a = 50 m","2a = 300 m"],ans:0,
+   hint:"Distancia = velocidad × tiempo. Esa diferencia de distancias = 2a de la hipérbola",
+   exp:"La diferencia de distancias a las estaciones: d = v·Δt = 5 × 0.006 = 0.03 km = 30 m. Esta diferencia es 2a de la hipérbola donde se ubica el epicentro.",
+   formula_exp:"2a = v·Δt = 5 × 0.006 = 0.03 km"},
+
+  // ——— PREGUNTAS EXTRAS ———
+  {t:"conc",diff:2,q:"¿Cuál ecuación representa hipérbola?",f:null,
+   opts:["x² − 2y² = 4 (signos opuestos)","x² + 2y² = 4 (elipse)","x² + y² = 4 (círculo)","y = x² (parábola)"],ans:0,
+   hint:"Busca la ecuación con signos CONTRARIOS entre x² e y²",
+   exp:"x² − 2y² = 4: los signos de x² e y² son opuestos → hipérbola. Forma estándar: x²/4 − y²/2 = 1.",
+   formula_exp:"Signos opuestos en x² e y² → hipérbola"},
+
+  {t:"conc",diff:2,q:"y = k/x (con k ≠ 0) representa:",f:"y = k/x → xy = k",
+   opts:["Hipérbola equilátera con asíntotas en los ejes","Parábola horizontal","Función exponencial","No es cónica"],ans:0,
+   hint:"Multiplica ambos lados por x: xy = k. ¿Eso ya lo conoces?",
+   exp:"y = k/x → xy = k. Esta es la hipérbola equilátera rotada 45°, con asíntotas x = 0 (eje y) e y = 0 (eje x). Sus parámetros: a = b = √|k|.",
+   formula_exp:"xy = k — hipérbola equilátera (rotada 45°)"},
+
+  {t:"calc",diff:3,q:"Si e = 2 y a = 3, calcula b.",f:"e = c/a",
+   opts:["b = 3√3 ≈ 5.2","b = 3","b = 6","b = √3"],ans:0,
+   hint:"c = e·a. Luego b² = c² − a²",
+   exp:"c = e·a = 2·3 = 6. b² = c² − a² = 36 − 9 = 27 → b = √27 = 3√3 ≈ 5.196.",
+   formula_exp:"c = 6, b² = 36−9 = 27 → b = 3√3"},
+
+  {t:"calc",diff:3,q:"Halla k para que kx² − 3y² = 12 sea hipérbola con a = 2.",f:"a² = 12/k = 4",
+   opts:["k = 3","k = 4","k = 6","k = 12"],ans:0,
+   hint:"Forma estándar: x²/(12/k) − y²/4 = 1. Queremos a² = 12/k = 4",
+   exp:"Dividir entre 12: x²/(12/k) − y²/4 = 1. a² = 12/k = 4 → k = 3. Ecuación: x²/4 − y²/4 = 1 (hipérbola equilátera).",
+   formula_exp:"k = 3 → x²/4 − y²/4 = 1"},
+
+  {t:"calc",diff:2,q:"La directriz de x²/a² − y²/b² = 1 está en:",f:"directriz: x = ±a²/c",
+   opts:["x = ±a²/c = ±a/e","x = ±c²/a","x = ±a/b","x = ±b²/c"],ans:0,
+   hint:"La directriz está ENTRE el centro y el vértice (más cerca del centro)",
+   exp:"La directriz es x = ±a/e = ±a²/c. Para a=3, c=5: x = ±9/5 = ±1.8. La directriz está entre el origen y el vértice (vértice en x=3, directriz en x=1.8).",
+   formula_exp:"Directriz: x = ±a²/c (entre centro y vértice)"},
+
+  {t:"fact",diff:2,q:"La hipérbola (y−3)²/4 − (x+1)²/5 = 1 tiene eje:",f:null,
+   opts:["Vertical (y² positivo) — vértices (−1, 3±2)","Horizontal","Diagonal","No tiene eje definido"],ans:0,
+   hint:"El término con signo positivo define el eje",
+   exp:"y² positivo → eje real vertical. a² = 4 → a = 2. Centro (−1, 3). Vértices: (−1, 3+2) = (−1, 5) y (−1, 3−2) = (−1, 1).",
+   formula_exp:"Centro (−1,3), a=2 → Vértices: (−1,5) y (−1,1)"},
+];
+
+// ═══════════════════════════════════════════════
+// EJERCICIOS COMPLETOS (NIVEL DIFÍCIL)
+// ═══════════════════════════════════════════════
+const HARD_EXERCISES = [
+  {
+    id:"H1",title:"Ejercicio completo: x²/9 − y²/16 = 1",
+    intro:"Analiza COMPLETAMENTE esta hipérbola paso a paso. Deberás despejar, calcular todos los elementos y ubicarlos en la gráfica.",
+    equation:"x²/9 − y²/16 = 1",
+    steps:[
+      {label:"Identificar elementos",task:"Extrae a, b y c de la ecuación",blanks:[{id:"a",label:"a =",ans:"3",hint:"a² = 9"},{id:"b",label:"b =",ans:"4",hint:"b² = 16"},{id:"c",label:"c =",ans:"5",hint:"c² = 9+16=25"}]},
+      {label:"Tipo de hipérbola",task:"¿Cuál es el eje real?",choice:{opts:["Horizontal (eje x) — x² positivo","Vertical (eje y) — y² positivo"],ans:0}},
+      {label:"Vértices y focos",task:"Calcula vértices y focos",blanks:[{id:"v",label:"Vértices:",ans:"(±3,0)",hint:"(±a, 0)"},{id:"f",label:"Focos:",ans:"(±5,0)",hint:"(±c, 0)"}]},
+      {label:"Asíntotas",task:"Escribe las ecuaciones de las asíntotas",blanks:[{id:"as",label:"Asíntotas:",ans:"y=±(4/3)x",hint:"y = ±(b/a)x"}]},
+      {label:"Excentricidad",task:"Calcula e con 2 decimales",blanks:[{id:"e",label:"e =",ans:"1.67",hint:"e = c/a = 5/3"}]},
+      {label:"Lado recto",task:"Calcula el lado recto LR",blanks:[{id:"lr",label:"LR =",ans:"32/3",hint:"LR = 2b²/a = 2·16/3"}]},
+    ],
+    graph:{a:3,b:4,vertical:false}
+  },
+  {
+    id:"H2",title:"Ejercicio completo: y²/25 − x²/144 = 1",
+    intro:"Esta hipérbola tiene eje VERTICAL. Aplica todo el proceso de análisis.",
+    equation:"y²/25 − x²/144 = 1",
+    steps:[
+      {label:"Identificar elementos",task:"Extrae a, b y c",blanks:[{id:"a",label:"a =",ans:"5",hint:"a² = 25 (término positivo y²)"},{id:"b",label:"b =",ans:"12",hint:"b² = 144"},{id:"c",label:"c =",ans:"13",hint:"c² = 25+144 = 169"}]},
+      {label:"Tipo de hipérbola",task:"¿Cuál es el eje real?",choice:{opts:["Horizontal (eje x) — x² positivo","Vertical (eje y) — y² positivo"],ans:1}},
+      {label:"Vértices y focos",task:"Calcula vértices y focos (eje vertical)",blanks:[{id:"v",label:"Vértices:",ans:"(0,±5)",hint:"(0, ±a) — eje vertical"},{id:"f",label:"Focos:",ans:"(0,±13)",hint:"(0, ±c)"}]},
+      {label:"Asíntotas",task:"Para eje vertical, pendiente = a/b",blanks:[{id:"as",label:"Asíntotas:",ans:"y=±(5/12)x",hint:"y = ±(a/b)x para eje vertical"}]},
+      {label:"Excentricidad",task:"Calcula e",blanks:[{id:"e",label:"e =",ans:"2.6",hint:"e = c/a = 13/5"}]},
+    ],
+    graph:{a:5,b:12,vertical:true}
+  },
+  {
+    id:"H3",title:"De general a canónica: 9x² − 16y² − 18x + 64y − 199 = 0",
+    intro:"Transforma la ecuación general a su forma canónica completando cuadrados.",
+    equation:"9x² − 16y² − 18x + 64y − 199 = 0",
+    steps:[
+      {label:"Agrupar por variable",task:"Agrupa términos con x y con y",choice:{opts:["(9x²−18x) − (16y²−64y) = 199","(9x²+16y²) − (18x+64y) = 199","9x²−16y² = 199+18x−64y","Ninguna agrupación correcta"],ans:0}},
+      {label:"Factor común",task:"Saca factor común en cada grupo",blanks:[{id:"fc",label:"Resultado:",ans:"9(x²−2x) − 16(y²−4y) = 199",hint:"9(x²−2x) − 16(y²−4y)"}]},
+      {label:"Completar cuadrado",task:"Completa cuadrado: (x−1)² = x²−2x+1, (y−2)² = y²−4y+4",blanks:[{id:"cc",label:"Suma al lado derecho:",ans:"9(1) − 16(4) = 9−64 = −55",hint:"Suma 9(1) del primer grupo y resta 16(4) del segundo"}]},
+      {label:"Forma canónica",task:"Escribe la ecuación canónica final",blanks:[{id:"can",label:"Ecuación canónica:",ans:"(x−1)²/25 − (y−2)²/? ver exp",hint:"9(x−1)² − 16(y−2)² = 199+9−64 = 144 → ÷144"}]},
+      {label:"Identificar elementos",task:"Del resultado (x−1)²/16 − (y−2)²/9 = 1",blanks:[{id:"ctr",label:"Centro:",ans:"(1,2)",hint:"(h,k) de la forma estándar"},{id:"a2",label:"a =",ans:"4",hint:"a² = 16"},{id:"b2",label:"b =",ans:"3",hint:"b² = 9"}]},
+    ],
+    graph:{a:4,b:3,vertical:false,cx:1,cy:2}
+  },
+  {
+    id:"H4",title:"Construir hipérbola desde datos: Focos (±13,0), Vértices (±5,0)",
+    intro:"Construye la ecuación completa y analiza todos los elementos de la hipérbola.",
+    equation:"Focos: (±13, 0) | Vértices: (±5, 0)",
+    steps:[
+      {label:"Extraer datos",task:"¿Cuáles son a y c?",blanks:[{id:"a",label:"a =",ans:"5",hint:"Vértices en (±a, 0)"},{id:"c",label:"c =",ans:"13",hint:"Focos en (±c, 0)"}]},
+      {label:"Calcular b",task:"Usa c² = a² + b² → b² = c² − a²",blanks:[{id:"b",label:"b² =",ans:"144",hint:"b² = 169 − 25 = 144"},{id:"b2",label:"b =",ans:"12",hint:"b = √144"}]},
+      {label:"Escribir ecuación",task:"Escribe la ecuación canónica",blanks:[{id:"eq",label:"Ecuación:",ans:"x²/25 − y²/144 = 1",hint:"x²/a² − y²/b² = 1"}]},
+      {label:"Asíntotas y LR",task:"Calcula asíntotas y lado recto",blanks:[{id:"as",label:"Asíntotas:",ans:"y=±(12/5)x",hint:"y = ±(b/a)x = ±(12/5)x"},{id:"lr",label:"LR =",ans:"288/5",hint:"LR = 2b²/a = 2(144)/5"}]},
+      {label:"Excentricidad",task:"Calcula e y clasifica la hipérbola",blanks:[{id:"e",label:"e =",ans:"2.6",hint:"e = c/a = 13/5 = 2.6"},{id:"tipo",label:"¿Tipo?",ans:"Muy abierta",hint:"e > 2 → hipérbola muy abierta"}]},
+    ],
+    graph:{a:5,b:12,vertical:false}
+  },
+  {
+    id:"H5",title:"Hipérbola equilátera: x² − y² = 16",
+    intro:"Analiza esta hipérbola especial donde a = b y las asíntotas son perpendiculares.",
+    equation:"x² − y² = 16",
+    steps:[
+      {label:"Forma estándar",task:"Divide entre 16 para obtener forma estándar",blanks:[{id:"std",label:"Forma estándar:",ans:"x²/16 − y²/16 = 1",hint:"÷16: x²/16 − y²/16 = 1"}]},
+      {label:"¿Es equilátera?",task:"¿Por qué es hipérbola equilátera?",choice:{opts:["Porque a = b = 4 (denominadores iguales)","Porque a = c","Porque b = c","No es equilátera"],ans:0}},
+      {label:"Asíntotas especiales",task:"Las asíntotas perpendiculares son:",blanks:[{id:"as",label:"Asíntotas:",ans:"y = ±x",hint:"y = ±(b/a)x = ±(4/4)x = ±x"}]},
+      {label:"Excentricidad especial",task:"Excentricidad de toda hipérbola equilátera",blanks:[{id:"e",label:"e =",ans:"√2",hint:"c² = a²+b² = 2a² → c = a√2 → e = √2"},{id:"eval",label:"e ≈",ans:"1.41",hint:"√2 ≈ 1.414"}]},
+      {label:"Elementos clave",task:"Calcula vértices, focos y LR",blanks:[{id:"v",label:"Vértices:",ans:"(±4,0)",hint:"(±a, 0) = (±4, 0)"},{id:"f",label:"Focos:",ans:"(±4√2,0)",hint:"c = 4√2"},{id:"lr",label:"LR =",ans:"8",hint:"LR = 2b²/a = 2(16)/4 = 8"}]},
+    ],
+    graph:{a:4,b:4,vertical:false}
+  },
+];
+
+// ═══════════════════════════════════════════════
+// ESTADO GLOBAL
+// ═══════════════════════════════════════════════
+let state={
+  mode:'menu', // 'menu', 'quiz', 'hard', 'walkthrough'
+  filter:'all',
+  questions:[],
+  current:0,
+  score:0,
+  answered:0,
+  userAnswers:[],
+  showResult:false,
+  hintsUsed:0,
+  hardExIdx:0,
+  hardStepIdx:0,
+  hardInputs:{},
+  hardDone:{},
+  wtStep:0,
+};
+
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a;}
+
+// Mezcla las OPCIONES de cada pregunta y actualiza ans al nuevo índice
+function shuffleOpts(q){
+  const correct=q.opts[q.ans];
+  const shuffled=shuffle([...q.opts]);
+  return {...q, opts:shuffled, ans:shuffled.indexOf(correct)};
+}
+
+function initQuiz(){
+  let pool=state.filter==='all'?ALL_Q:ALL_Q.filter(q=>q.t===state.filter);
+  // Mezcla orden de preguntas Y opciones de cada una
+  state.questions=shuffle(pool).map(shuffleOpts);
+  state.current=0;state.score=0;state.answered=0;state.hintsUsed=0;
+  state.userAnswers=new Array(state.questions.length).fill(-1);
+  state.showResult=false;
+}
+
+// ═══════════════════════════════════════════════
+// RENDER MAIN
+// ═══════════════════════════════════════════════
+function render(){
+  const app=document.getElementById('app');
+  if(state.mode==='menu'){renderMenu(app);return;}
+  if(state.mode==='walkthrough'){renderWalkthrough(app);return;}
+  if(state.mode==='hard'){renderHard(app);return;}
+  if(state.mode==='quiz'){
+    if(state.showResult){renderResult(app);return;}
+    renderQuiz(app);
+  }
+}
+
+// ═══════════════════════════════════════════════
+// MENU
+// ═══════════════════════════════════════════════
+function renderMenu(app){
+  app.innerHTML=`
+  <div class="header">
+    <div class="logo">📐</div>
+    <h1>Hipérbola — Curso Completo</h1>
+    <div class="subtitle">Todos los temas: definición, forma canónica, gráficas, ejercicios completos</div>
+  </div>
+  <div class="topic-screen">
+    <div class="topic-hero">
+      <h2>¿Por dónde quieres comenzar?</h2>
+      <p>Elige un modo de estudio. El quiz aleatoriza preguntas cada vez. Los ejercicios completos te llevan paso a paso por cada cálculo.</p>
+    </div>
+    <div class="topic-card" onclick="startWalkthrough()">
+      <div class="topic-icon">📖</div>
+      <div class="topic-info">
+        <h3>Ejemplo guiado: Hipérbola de A a Z</h3>
+        <p>Aprende con un ejemplo completo: de ecuación general a canónica, con gráfica interactiva</p>
+      </div>
+      <div class="topic-count">5 pasos</div>
+    </div>
+    <div class="topic-card" onclick="startQuiz('all')">
+      <div class="topic-icon">🎯</div>
+      <div class="topic-info">
+        <h3>Quiz General — Todas las preguntas</h3>
+        <p>Preguntas aleatorias de todos los temas: conceptos, cálculo, álgebra y gráficas</p>
+      </div>
+      <div class="topic-count">${ALL_Q.length} preguntas</div>
+    </div>
+    <div class="topic-card" onclick="startQuiz('conc')">
+      <div class="topic-icon">💡</div>
+      <div class="topic-info">
+        <h3>Solo Conceptos</h3>
+        <p>Definiciones, propiedades, características y teoría de la hipérbola</p>
+      </div>
+      <div class="topic-count">${ALL_Q.filter(q=>q.t==='conc').length} preguntas</div>
+    </div>
+    <div class="topic-card" onclick="startQuiz('calc')">
+      <div class="topic-icon">🔢</div>
+      <div class="topic-info">
+        <h3>Solo Cálculos Numéricos</h3>
+        <p>a, b, c, excentricidad, lado recto, focos, asíntotas con números</p>
+      </div>
+      <div class="topic-count">${ALL_Q.filter(q=>q.t==='calc').length} preguntas</div>
+    </div>
+    <div class="topic-card" onclick="startQuiz('fact')">
+      <div class="topic-icon">✏️</div>
+      <div class="topic-info">
+        <h3>Solo Álgebra y Factorización</h3>
+        <p>Forma estándar, completar cuadrados, centros desplazados, factorización</p>
+      </div>
+      <div class="topic-count">${ALL_Q.filter(q=>q.t==='fact').length} preguntas</div>
+    </div>
+    <div class="topic-card" onclick="startQuiz('graph')">
+      <div class="topic-icon">📈</div>
+      <div class="topic-info">
+        <h3>Solo Gráficas</h3>
+        <p>Trazar hipérbolas, rectángulo auxiliar, asíntotas, apertura de ramas</p>
+      </div>
+      <div class="topic-count">${ALL_Q.filter(q=>q.t==='graph').length} preguntas</div>
+    </div>
+    <div class="topic-card" onclick="startHard()" style="border-color:rgba(255,71,87,0.3);background:rgba(255,71,87,0.04)">
+      <div class="topic-icon">🔥</div>
+      <div class="topic-info">
+        <h3>Ejercicios Completos — Nivel Difícil</h3>
+        <p>Completa el ejercicio entero: despeje, cálculo, factorización y gráfica interactiva</p>
+      </div>
+      <div class="topic-count" style="color:#ff6b6b;border-color:rgba(255,71,87,0.2)">${HARD_EXERCISES.length} ejercicios</div>
+    </div>
+  </div>`;
+}
+
+function startQuiz(filter){
+  playClick();
+  state.filter=filter;
+  state.mode='quiz';
+  initQuiz();
+  render();
+}
+
+// ═══════════════════════════════════════════════
+// QUIZ
+// ═══════════════════════════════════════════════
+function renderQuiz(app){
+  const q=state.questions[state.current];
+  const qi=state.current;
+  const done=state.userAnswers[qi]>=0;
+  const ua=state.userAnswers[qi];
+  const pct=Math.round((state.current/state.questions.length)*100);
+
+  const typeLabels={calc:'🔢 Cálculo',graph:'📈 Gráfica',conc:'💡 Concepto',fact:'✏️ Álgebra'};
+  const typeClasses={calc:'b-calc',graph:'b-graph',conc:'b-conc',fact:'b-fact'};
+
+  const diffDots=Array.from({length:3},(_,i)=>`<div class="diff-dot${i<q.diff?' filled':''}"></div>`).join('');
+
+  const optLetters=['A','B','C','D'];
+  const optHtml=q.opts.map((o,i)=>{
+    let cls='opt';
+    if(done){
+      if(i===q.ans)cls+=' correct';
+      else if(i===ua&&ua!==q.ans)cls+=' wrong';
+      else cls+=' reveal';
+    }
+    return `<button class="${cls}" ${done?'disabled':''} onclick="answer(${qi},${i})">
+      <span class="opt-letter">${optLetters[i]}</span>
+      <span>${o}</span>
+    </button>`;
+  }).join('');
+
+  const isLong=q.opts.some(o=>o.length>40);
+
+  app.innerHTML=`
+  <div style="margin-bottom:12px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <button onclick="backToMenu()" style="padding:7px 14px;font-size:12px">← Menú</button>
+      <div style="font-size:13px;font-weight:600;color:var(--text2)">
+        <span style="color:var(--correct)">✓ ${state.score}</span>
+        <span style="margin:0 8px;color:var(--border)">|</span>
+        <span style="color:var(--wrong)">✗ ${state.answered-state.score}</span>
+      </div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="progress-info"><span>Pregunta ${state.current+1} / ${state.questions.length}</span><span>${pct}% completado</span></div>
+    </div>
+    <div class="filter-row">
+      ${['all','calc','graph','conc','fact'].map(f=>`<button class="filter-btn${state.filter===f?' active':''}" onclick="changeFilter('${f}')">${{all:'Todas',calc:'Cálculo',graph:'Gráfica',conc:'Concepto',fact:'Álgebra'}[f]}</button>`).join('')}
+    </div>
+  </div>
+
+  <div class="question-card">
+    <div class="q-meta">
+      <span class="badge ${typeClasses[q.t]||'b-conc'}">${typeLabels[q.t]||q.t}</span>
+      <span class="q-num">Dificultad:</span>
+      <div class="diff-dots">${diffDots}</div>
+    </div>
+    <div class="q-text">${q.q}</div>
+    ${q.f?`<div class="q-formula">${q.f}</div>`:''}
+    ${(q.t==='graph')?`<div class="graph-container" id="graphContainer"></div>`:''}
+    <div class="hint-box${done||!q.hint?'':''}" id="hintBox">
+      💡 <strong>Pista:</strong> ${q.hint||''}
+    </div>
+    <div class="options${isLong?' options-1col':''}" id="optContainer">
+      ${optHtml}
+    </div>
+    ${done?`
+    <div class="explanation ${ua===q.ans?'exp-right':'exp-wrong'}">
+      <div class="exp-header">${ua===q.ans?'✅ ¡Correcto!':'❌ Incorrecto — respuesta correcta: '+optLetters[q.ans]+')'}</div>
+      <div class="exp-detail">${q.exp}</div>
+      ${q.formula_exp?`<div class="exp-formula">${q.formula_exp}</div>`:''}
+    </div>`:''}
+    <div class="nav-row">
+      <button onclick="prev()" ${state.current===0?'disabled':''}>← Anterior</button>
+      ${!done?`<button class="btn-hint" onclick="showHint()" ${!q.hint?'disabled':''}>💡 Pista</button>`:''}
+      <button class="primary" onclick="next()">Siguiente →</button>
+      <button onclick="()=>{state.showResult=true;render()}" style="margin-left:auto;font-size:12px;color:var(--text3)" onclick="finishEarly()">Ver resultado</button>
+    </div>
+  </div>`;
+
+  // Draw graph if needed
+  if(q.t==='graph'){
+    setTimeout(()=>{
+      const gc=document.getElementById('graphContainer');
+      if(!gc)return;
+      const cv=document.createElement('canvas');
+      cv.width=320;cv.height=220;cv.id='hc';
+      gc.appendChild(cv);
+      renderGraphControls(gc,q);
+      const m=q.f?(q.f.match(/\d+/g)||[]):[9,4];
+      let a=3,b=2,vertical=false;
+      if(m.length>=2){a=Math.sqrt(parseInt(m[0])||9);b=Math.sqrt(parseInt(m[1])||4);}
+      if(q.f&&q.f.trim().startsWith('y'))vertical=true;
+      drawHyperbolaFull(cv,a,b,vertical,{showAsymptotes:true,showVertices:true,showFoci:true});
+    },50);
+  }
+}
+
+function renderGraphControls(gc,q){
+  const div=document.createElement('div');
+  div.className='graph-controls';
+  div.id='gCtrl';
+  div.innerHTML=`
+    <button class="graph-btn active" id="gBtnAs" onclick="toggleLayer('asymptotes',this)">Asíntotas</button>
+    <button class="graph-btn active" id="gBtnVt" onclick="toggleLayer('vertices',this)">Vértices</button>
+    <button class="graph-btn active" id="gBtnFc" onclick="toggleLayer('foci',this)">Focos</button>
+    <button class="graph-btn" id="gBtnRt" onclick="toggleLayer('rect',this)">Rectángulo</button>
+    <button class="graph-btn" id="gBtnLr" onclick="toggleLayer('latus',this)">Lado recto</button>
+  `;
+  gc.appendChild(div);
+}
+
+let graphLayers={asymptotes:true,vertices:true,foci:true,rect:false,latus:false};
+let _curQ=null;
+function toggleLayer(layer,btn){
+  playClick();
+  graphLayers[layer]=!graphLayers[layer];
+  btn.classList.toggle('active');
+  const cv=document.getElementById('hc');if(!cv)return;
+  const q=state.questions[state.current];
+  const m=q.f?(q.f.match(/\d+/g)||[]):[9,4];
+  let a=3,b=2,vertical=false;
+  if(m.length>=2){a=Math.sqrt(parseInt(m[0])||9);b=Math.sqrt(parseInt(m[1])||4);}
+  if(q.f&&q.f.trim().startsWith('y'))vertical=true;
+  drawHyperbolaFull(cv,a,b,vertical,graphLayers);
+}
+
+// ═══════════════════════════════════════════════
+// HYPERBOLA DRAWING ENGINE — versión anotada
+// ═══════════════════════════════════════════════
+function drawHyperbolaFull(canvas,a,b,vertical=false,opts={}){
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  // Fondo con gradiente sutil
+  const bgGrad=ctx.createLinearGradient(0,0,W,H);
+  bgGrad.addColorStop(0,'#0d0f1e');bgGrad.addColorStop(1,'#111328');
+  ctx.fillStyle=bgGrad;ctx.fillRect(0,0,W,H);
+
+  // Escala adaptativa: que la hipérbola ocupe bien el canvas
+  const maxVal=Math.max(a,b)*2.8;
+  const scale=Math.min(W,H)*0.42/maxVal;
+  const ox=W/2,oy=H/2;
+
+  // ── Cuadrícula con números ──
+  ctx.strokeStyle='rgba(255,255,255,0.04)';ctx.lineWidth=0.5;
+  const gridStep=Math.ceil(maxVal/4);
+  for(let i=-10;i<=10;i++){
+    ctx.beginPath();ctx.moveTo(ox+i*gridStep*scale,0);ctx.lineTo(ox+i*gridStep*scale,H);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(0,oy+i*gridStep*scale);ctx.lineTo(W,oy+i*gridStep*scale);ctx.stroke();
+  }
+  // Números del eje
+  ctx.fillStyle='rgba(255,255,255,0.2)';ctx.font='9px JetBrains Mono,monospace';ctx.textAlign='center';
+  for(let i=-3;i<=3;i++){
+    if(i===0)continue;
+    const v=i*gridStep;
+    ctx.fillText(v,ox+v*scale,oy+13);
+    ctx.textAlign='right';ctx.fillText(v,ox-4,oy-v*scale+3);ctx.textAlign='center';
+  }
+
+  // ── Ejes principales ──
+  ctx.strokeStyle='rgba(255,255,255,0.25)';ctx.lineWidth=1.5;
+  // Eje X con flecha
+  ctx.beginPath();ctx.moveTo(8,oy);ctx.lineTo(W-8,oy);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(W-8,oy);ctx.lineTo(W-14,oy-4);ctx.moveTo(W-8,oy);ctx.lineTo(W-14,oy+4);ctx.stroke();
+  // Eje Y con flecha
+  ctx.beginPath();ctx.moveTo(ox,H-8);ctx.lineTo(ox,8);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(ox,8);ctx.lineTo(ox-4,14);ctx.moveTo(ox,8);ctx.lineTo(ox+4,14);ctx.stroke();
+  // Etiquetas de ejes
+  ctx.fillStyle='rgba(255,255,255,0.35)';ctx.font='bold 11px Space Grotesk,sans-serif';
+  ctx.textAlign='center';ctx.fillText('x',W-6,oy-8);
+  ctx.textAlign='left';ctx.fillText('y',ox+6,10);
+  // Origen
+  ctx.fillStyle='rgba(255,255,255,0.15)';ctx.font='9px JetBrains Mono,monospace';
+  ctx.textAlign='right';ctx.fillText('0',ox-4,oy+11);
+
+  // Para eje vertical, a y b se intercambian en la representación
+  const ta=vertical?b:a, tb=vertical?a:b;
+  const c=Math.sqrt(a*a+b*b);
+  const e=(c/a).toFixed(2);
+  const lr=(2*b*b/a).toFixed(2);
+
+  // ── Rectángulo auxiliar ──
+  if(opts.rect){
+    ctx.save();
+    ctx.strokeStyle='rgba(255,209,102,0.35)';ctx.lineWidth=1;ctx.setLineDash([4,4]);
+    ctx.strokeRect(ox-ta*scale,oy-tb*scale,2*ta*scale,2*tb*scale);
+    ctx.setLineDash([]);
+    // Etiquetas del rectángulo
+    ctx.fillStyle='rgba(255,209,102,0.6)';ctx.font='9px JetBrains Mono,monospace';
+    ctx.textAlign='center';
+    ctx.fillText(`2a=${(2*a).toFixed(1)}`,ox,oy-tb*scale-5);
+    ctx.textAlign='left';
+    ctx.fillText(`2b=${(2*b).toFixed(1)}`,ox+ta*scale+4,oy);
+    ctx.restore();
+  }
+
+  // ── Asíntotas ──
+  if(opts.asymptotes!==false){
+    ctx.save();
+    ctx.strokeStyle='rgba(167,139,250,0.55)';ctx.lineWidth=1.2;ctx.setLineDash([6,4]);
+    const slope=vertical?(a/b):(b/a);
+    // y = slope*x  →  at x=0: y=oy, at x=W: y=oy-(W-ox)*slope
+    // Asíntota y = +slope*x
+    ctx.beginPath();
+    ctx.moveTo(0, oy + ox*slope);
+    ctx.lineTo(W, oy - (W-ox)*slope);
+    ctx.stroke();
+    // Asíntota y = -slope*x
+    ctx.beginPath();
+    ctx.moveTo(0, oy - ox*slope);
+    ctx.lineTo(W, oy + (W-ox)*slope);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    // Etiqueta asíntota
+    ctx.fillStyle='rgba(167,139,250,0.75)';ctx.font='bold 10px JetBrains Mono,monospace';
+    const slopeNum=vertical?a:b, slopeDen=vertical?b:a;
+    const slopeStr=Number.isInteger(slopeNum/slopeDen)?`${slopeNum/slopeDen}`:`${slopeNum}/${slopeDen}`;
+    ctx.textAlign='right';
+    ctx.fillText(`asíntota: y=±${slopeStr}x`,W-6,16);
+    ctx.restore();
+  }
+
+  // ── Curvas de la hipérbola ──
+  const curveColor=vertical?'#00d4aa':'#60a5fa';
+  const glowColor=vertical?'rgba(0,212,170,0.18)':'rgba(96,165,250,0.18)';
+
+  for(let branch=0;branch<2;branch++){
+    // Glow exterior
+    ctx.save();
+    ctx.strokeStyle=glowColor;ctx.lineWidth=9;ctx.lineCap='round';
+    ctx.beginPath();let first=true;
+    for(let t=-3.5;t<=3.5;t+=0.025){
+      let px,py;
+      if(vertical){const y=(branch===0?1:-1)*a*Math.cosh(t),x=b*Math.sinh(t);px=ox+x*scale;py=oy-y*scale;}
+      else{const x=(branch===0?1:-1)*a*Math.cosh(t),y=b*Math.sinh(t);px=ox+x*scale;py=oy-y*scale;}
+      if(px<-10||px>W+10||py<-10||py>H+10){first=true;continue;}
+      if(first){ctx.moveTo(px,py);first=false;}else ctx.lineTo(px,py);
+    }
+    ctx.stroke();ctx.restore();
+
+    // Curva principal
+    ctx.strokeStyle=curveColor;ctx.lineWidth=2.5;ctx.lineCap='round';
+    ctx.beginPath();first=true;
+    for(let t=-3.5;t<=3.5;t+=0.02){
+      let px,py;
+      if(vertical){const y=(branch===0?1:-1)*a*Math.cosh(t),x=b*Math.sinh(t);px=ox+x*scale;py=oy-y*scale;}
+      else{const x=(branch===0?1:-1)*a*Math.cosh(t),y=b*Math.sinh(t);px=ox+x*scale;py=oy-y*scale;}
+      if(px<-5||px>W+5||py<-5||py>H+5){first=true;continue;}
+      if(first){ctx.moveTo(px,py);first=false;}else ctx.lineTo(px,py);
+    }
+    ctx.stroke();
+
+    // Etiqueta de rama
+    if(opts.vertices!==false){
+      const branchLabel=branch===0?'Rama 1':'Rama 2';
+      let lx,ly;
+      if(vertical){lx=ox+5;ly=branch===0?oy-a*scale*1.6:oy+a*scale*1.6;}
+      else{lx=branch===0?ox+a*scale*1.5:ox-a*scale*1.5;ly=b*scale*0.8+oy;}
+      if(lx>0&&lx<W&&ly>0&&ly<H){
+        ctx.fillStyle=curveColor;ctx.font='bold 9px Space Grotesk,sans-serif';
+        ctx.textAlign=vertical?'left':(branch===0?'left':'right');
+        ctx.fillText(branchLabel,lx,ly);
+      }
+    }
+  }
+
+  // ── Vértices ──
+  if(opts.vertices!==false){
+    const vPts=vertical?[[ox,oy-a*scale],[ox,oy+a*scale]]:[[ox+a*scale,oy],[ox-a*scale,oy]];
+    const vLabels=vertical?[`V₁(0,${a})`,`V₂(0,−${a})`]:[`V₁(${a},0)`,`V₂(−${a},0)`];
+    vPts.forEach(([px,py],i)=>{
+      // Línea punteada al eje
+      ctx.save();ctx.strokeStyle='rgba(255,209,102,0.25)';ctx.lineWidth=1;ctx.setLineDash([3,3]);
+      if(vertical){ctx.beginPath();ctx.moveTo(ox-15,py);ctx.lineTo(ox+15,py);ctx.stroke();}
+      else{ctx.beginPath();ctx.moveTo(px,oy-15);ctx.lineTo(px,oy+15);ctx.stroke();}
+      ctx.restore();
+      // Punto
+      ctx.beginPath();ctx.arc(px,py,5.5,0,Math.PI*2);
+      ctx.fillStyle='#ffd166';ctx.fill();
+      ctx.strokeStyle='#0d0f1e';ctx.lineWidth=2;ctx.stroke();
+      // Etiqueta con fondo
+      const lbl=vLabels[i];
+      const lx=vertical?px+10:px;
+      const ly=vertical?py+4:py-10;
+      ctx.font='bold 10px Space Grotesk,sans-serif';
+      const tw=ctx.measureText(lbl).width;
+      ctx.fillStyle='rgba(13,15,30,0.7)';
+      ctx.fillRect(lx-2,ly-11,tw+4,14);
+      ctx.fillStyle='#ffd166';ctx.textAlign='left';
+      ctx.fillText(lbl,lx,ly);
+    });
+  }
+
+  // ── Focos ──
+  if(opts.foci!==false){
+    const fPts=vertical?[[ox,oy-c*scale],[ox,oy+c*scale]]:[[ox+c*scale,oy],[ox-c*scale,oy]];
+    const cf=parseFloat(c.toFixed(2));
+    const fLabels=vertical?[`F₁(0,${cf})`,`F₂(0,−${cf})`]:[`F₁(${cf},0)`,`F₂(−${cf},0)`];
+    fPts.forEach(([px,py],i)=>{
+      if(px<2||px>W-2||py<2||py>H-2)return;
+      // Cruz indicadora
+      ctx.save();ctx.strokeStyle='rgba(255,107,157,0.4)';ctx.lineWidth=1;ctx.setLineDash([2,2]);
+      ctx.beginPath();ctx.moveTo(px-10,py);ctx.lineTo(px+10,py);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(px,py-10);ctx.lineTo(px,py+10);ctx.stroke();
+      ctx.restore();
+      // Punto (rombo)
+      ctx.save();ctx.translate(px,py);ctx.rotate(Math.PI/4);
+      ctx.fillStyle='#ff6b9d';
+      ctx.fillRect(-4.5,-4.5,9,9);
+      ctx.restore();
+      // Etiqueta
+      const lbl=fLabels[i];
+      const lx=vertical?px+10:px;
+      const ly=vertical?py+4:py+16;
+      ctx.font='bold 10px Space Grotesk,sans-serif';
+      const tw=ctx.measureText(lbl).width;
+      if(lx+tw<W&&ly<H&&lx>0&&ly>0){
+        ctx.fillStyle='rgba(13,15,30,0.7)';
+        ctx.fillRect(lx-2,ly-11,tw+4,14);
+        ctx.fillStyle='#ff6b9d';ctx.textAlign='left';
+        ctx.fillText(lbl,lx,ly);
+      }
+    });
+  }
+
+  // ── Lado recto ──
+  if(opts.latus){
+    const lrVal=2*b*b/a;
+    ctx.save();ctx.strokeStyle='rgba(0,212,170,0.7)';ctx.lineWidth=2.5;ctx.lineCap='round';
+    if(vertical){
+      ctx.beginPath();ctx.moveTo(ox-lrVal/2*scale,oy-c*scale);ctx.lineTo(ox+lrVal/2*scale,oy-c*scale);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(ox-lrVal/2*scale,oy+c*scale);ctx.lineTo(ox+lrVal/2*scale,oy+c*scale);ctx.stroke();
+    }else{
+      ctx.beginPath();ctx.moveTo(ox+c*scale,oy-lrVal/2*scale);ctx.lineTo(ox+c*scale,oy+lrVal/2*scale);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(ox-c*scale,oy-lrVal/2*scale);ctx.lineTo(ox-c*scale,oy+lrVal/2*scale);ctx.stroke();
+    }
+    // Etiqueta LR
+    ctx.fillStyle='rgba(0,212,170,0.85)';ctx.font='bold 10px JetBrains Mono,monospace';
+    if(!vertical&&ox+c*scale+5<W){
+      ctx.textAlign='left';
+      ctx.fillText(`LR=${lrVal.toFixed(2)}`,ox+c*scale+5,oy-lrVal/2*scale-4);
+    }else if(vertical){
+      ctx.textAlign='left';
+      ctx.fillText(`LR=${lrVal.toFixed(2)}`,ox+lrVal/2*scale+5,oy-c*scale);
+    }
+    ctx.restore();
+  }
+
+  // ── Panel de información ──
+  const infoLines=[
+    `a=${a.toFixed(2)}  b=${b.toFixed(2)}  c=${c.toFixed(2)}`,
+    `e = c/a = ${e}`,
+    `LR = 2b²/a = ${lr}`,
+    vertical?'Eje: Vertical (y²>0)':'Eje: Horizontal (x²>0)',
+  ];
+  const panelW=152,panelH=70,panelX=6,panelY=H-panelH-6;
+  ctx.fillStyle='rgba(13,15,30,0.75)';
+  ctx.beginPath();ctx.roundRect(panelX,panelY,panelW,panelH,8);ctx.fill();
+  ctx.strokeStyle='rgba(108,99,255,0.3)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.roundRect(panelX,panelY,panelW,panelH,8);ctx.stroke();
+  ctx.font='10px JetBrains Mono,monospace';ctx.textAlign='left';
+  infoLines.forEach((line,i)=>{
+    ctx.fillStyle=i===0?'rgba(255,255,255,0.6)':i===1?'#a78bfa':i===2?'#00d4aa':'rgba(255,255,255,0.35)';
+    ctx.fillText(line,panelX+8,panelY+16+i*14);
+  });
+
+  // ── Leyenda de colores ──
+  if(opts.vertices!==false||opts.foci!==false||opts.asymptotes!==false){
+    const legendItems=[];
+    if(opts.asymptotes!==false)legendItems.push({color:'rgba(167,139,250,0.75)',label:'Asíntotas'});
+    if(opts.vertices!==false)legendItems.push({color:'#ffd166',label:'Vértices'});
+    if(opts.foci!==false)legendItems.push({color:'#ff6b9d',label:'Focos'});
+    if(opts.rect)legendItems.push({color:'rgba(255,209,102,0.5)',label:'Rectángulo aux.'});
+    if(opts.latus)legendItems.push({color:'#00d4aa',label:'Lado recto'});
+
+    const lW=110,lH=legendItems.length*14+10;
+    const lX=W-lW-6,lY=H-lH-6;
+    ctx.fillStyle='rgba(13,15,30,0.75)';
+    ctx.beginPath();ctx.roundRect(lX,lY,lW,lH,8);ctx.fill();
+    ctx.strokeStyle='rgba(108,99,255,0.3)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.roundRect(lX,lY,lW,lH,8);ctx.stroke();
+    legendItems.forEach((item,i)=>{
+      ctx.fillStyle=item.color;
+      ctx.fillRect(lX+8,lY+7+i*14,10,10);
+      ctx.fillStyle='rgba(255,255,255,0.5)';
+      ctx.font='9px Space Grotesk,sans-serif';
+      ctx.textAlign='left';
+      ctx.fillText(item.label,lX+22,lY+16+i*14);
+    });
+  }
+}
+
+// ═══════════════════════════════════════════════
+// ANSWER & NAV
+// ═══════════════════════════════════════════════
+function answer(qi,i){
+  if(state.userAnswers[qi]>=0)return;
+  state.userAnswers[qi]=i;
+  state.answered++;
+  if(i===state.questions[qi].ans){
+    state.score++;
+    playCorrect();
+    showToast('✅ ¡Correcto!','ok',1500);
+  }else{
+    playWrong();
+    showToast('❌ Incorrecto — revisa la explicación','err',2000);
+  }
+  render();
+}
+
+function showHint(){
+  playClick();
+  state.hintsUsed++;
+  const hb=document.getElementById('hintBox');
+  if(hb){hb.classList.toggle('visible');}
+}
+
+function next(){
+  playNav();
+  if(state.current<state.questions.length-1){state.current++;render();}
+  else{state.showResult=true;playFinish();render();}
+}
+function prev(){playNav();if(state.current>0){state.current--;render();}}
+function changeFilter(f){playClick();state.filter=f;initQuiz();render();}
+function backToMenu(){playClick();state.mode='menu';render();}
+function finishEarly(){state.showResult=true;playFinish();render();}
+
+// ═══════════════════════════════════════════════
+// RESULT
+// ═══════════════════════════════════════════════
+function renderResult(app){
+  const pct=state.answered?Math.round(state.score/state.answered*100):0;
+  const emoji=pct>=90?'🏆':pct>=70?'⭐':pct>=50?'📚':'💪';
+  const msg=pct>=90?'¡Eres un experto en hipérbolas!':pct>=70?'¡Muy bien! Estás dominando el tema.':pct>=50?'Buen progreso. Repasa los errores.':'Sigue practicando, ¡tú puedes!';
+  app.innerHTML=`
+  <div class="result-screen">
+    <div class="result-emoji">${emoji}</div>
+    <div class="result-score">${pct}%</div>
+    <div class="result-msg">${msg}</div>
+    <div class="result-grid">
+      <div class="stat-card green"><div class="val">${state.score}</div><div class="lbl">Correctas</div></div>
+      <div class="stat-card red"><div class="val">${state.answered-state.score}</div><div class="lbl">Incorrectas</div></div>
+      <div class="stat-card yellow"><div class="val">${state.questions.length-state.answered}</div><div class="lbl">Sin resp.</div></div>
+    </div>
+    ${state.hintsUsed>0?`<div style="font-size:13px;color:var(--text2);margin-bottom:20px">Pistas usadas: ${state.hintsUsed}</div>`:''}
+    <div class="result-actions">
+      <button class="primary" onclick="restartQuiz()">🔄 Repetir (aleatorio)</button>
+      <button onclick="reviewWrong()">📋 Revisar errores</button>
+      <button onclick="backToMenu()">🏠 Menú</button>
+    </div>
+  </div>`;
+}
+
+function restartQuiz(){playClick();initQuiz();render();}
+function reviewWrong(){
+  const wrong=state.questions.filter((_,i)=>state.userAnswers[i]>=0&&state.userAnswers[i]!==state.questions[i].ans);
+  if(!wrong.length){showToast('¡Sin errores que revisar! 🎉','ok');return;}
+  state.questions=shuffle(wrong);
+  state.userAnswers=new Array(state.questions.length).fill(-1);
+  state.score=0;state.answered=0;state.hintsUsed=0;state.current=0;state.showResult=false;
+  render();
+}
+
+// ═══════════════════════════════════════════════
+// WALKTHROUGH (Ejemplo guiado)
+// ═══════════════════════════════════════════════
+const WT_STEPS=[
+  {icon:'📌',title:'¿Qué es la hipérbola?',body:`
+    La hipérbola es una <strong>sección cónica</strong> formada cuando un plano corta ambas hojas de un cono doble.<br><br>
+    <strong>Definición formal:</strong> Lugar geométrico de puntos P donde la <em>diferencia</em> de distancias a dos focos fijos F₁ y F₂ es constante:
+    <div class="wt-formula">|PF₁ − PF₂| = 2a (constante)</div>
+    Tiene <strong>dos ramas</strong> simétricas y <strong>dos asíntotas</strong> que nunca toca.`,canvas:null},
+  {icon:'📐',title:'Forma canónica y elementos',body:`
+    La ecuación <strong>canónica u estándar</strong> para eje horizontal:
+    <div class="wt-formula">x²/a² − y²/b² = 1</div>
+    Sus elementos fundamentales:
+    <div class="wt-formula">• a = semi-eje real (distancia al vértice)
+• b = semi-eje conjugado
+• c = distancia al foco, donde c² = a² + b²
+• e = c/a > 1 (excentricidad)
+• Asíntotas: y = ±(b/a)x
+• Lado recto: LR = 2b²/a</div>`,canvas:{a:3,b:2,vertical:false}},
+  {icon:'🔢',title:'Ejemplo: Analizar x²/9 − y²/16 = 1',body:`
+    <strong>Paso 1:</strong> Extraer a y b
+    <div class="wt-formula">a² = 9 → a = 3 | b² = 16 → b = 4</div>
+    <strong>Paso 2:</strong> Calcular c
+    <div class="wt-formula">c² = a² + b² = 9 + 16 = 25 → c = 5</div>
+    <strong>Paso 3:</strong> Elementos completos
+    <div class="wt-formula">Vértices: (±3, 0) | Focos: (±5, 0)
+Asíntotas: y = ±(4/3)x ≈ ±1.33x
+e = c/a = 5/3 ≈ 1.67 | LR = 2(16)/3 = 32/3</div>`,canvas:{a:3,b:4,vertical:false}},
+  {icon:'🔄',title:'Hipérbola con eje vertical: y²/25 − x²/9 = 1',body:`
+    Cuando y² tiene signo positivo, el eje real es <strong>vertical</strong>:
+    <div class="wt-formula">y²/25 − x²/9 = 1 → a² = 25, b² = 9</div>
+    <strong>Diferencias clave:</strong>
+    <div class="wt-formula">• a = 5 (del término y²)
+• Vértices: (0, ±5) — en el eje y
+• Focos: (0, ±c) con c² = 25+9 = 34 → c ≈ 5.83
+• Asíntotas: y = ±(a/b)x = ±(5/3)x
+• Ramas abren ARRIBA y ABAJO</div>`,canvas:{a:5,b:3,vertical:true}},
+  {icon:'📊',title:'De general a canónica: completar cuadrado',body:`
+    Ecuación general: <strong>9x² − 4y² − 36x + 8y + 4 = 0</strong><br><br>
+    <strong>Paso 1:</strong> Agrupar por variable
+    <div class="wt-formula">(9x² − 36x) − (4y² − 8y) = −4</div>
+    <strong>Paso 2:</strong> Factor común
+    <div class="wt-formula">9(x² − 4x) − 4(y² − 2y) = −4</div>
+    <strong>Paso 3:</strong> Completar cuadrado
+    <div class="wt-formula">9(x−2)² − 9·4 − 4(y−1)² + 4·1 = −4
+9(x−2)² − 4(y−1)² = −4 + 36 − 4 = 28... 
+Ajustando: → (x−2)²/(4/1) − (y−1)²/(9/1) = 1</div>
+    Centro (2,1), a²=4/?, hipérbola desplazada.`,canvas:{a:2,b:3,vertical:false,cx:60,cy:0}},
+];
+
+function startWalkthrough(){playClick();state.mode='walkthrough';state.wtStep=0;render();}
+
+function renderWalkthrough(app){
+  const s=WT_STEPS[state.wtStep];
+  const dots=WT_STEPS.map((_,i)=>`<div class="wt-dot${i===state.wtStep?' active':''}" onclick="wtGo(${i})"></div>`).join('');
+  app.innerHTML=`
+  <div style="margin-bottom:12px">
+    <button onclick="backToMenu()" style="padding:7px 14px;font-size:12px">← Menú</button>
+  </div>
+  <div class="walkthrough">
+    <div class="wt-header">
+      <h2>📖 Ejemplo guiado: Hipérbola de A a Z</h2>
+      <p>Paso ${state.wtStep+1} de ${WT_STEPS.length}</p>
+    </div>
+    <div class="wt-body">
+      <div class="wt-step active">
+        <div class="wt-step-title"><span class="wt-step-icon">${s.icon}</span>${s.title}</div>
+        <div class="wt-step-body">${s.body}</div>
+        ${s.canvas?`<div class="graph-container" id="wtCanvas" style="margin-top:14px"></div>`:''}
+      </div>
+    </div>
+    <div class="wt-nav">
+      <button onclick="wtPrev()" ${state.wtStep===0?'disabled':''}>← Anterior</button>
+      <div class="wt-dots">${dots}</div>
+      ${state.wtStep<WT_STEPS.length-1?`<button class="primary" onclick="wtNext()">Siguiente →</button>`:`<button class="primary" onclick="backToMenu()">🏠 Menú principal</button>`}
+    </div>
+  </div>`;
+
+  if(s.canvas){
+    setTimeout(()=>{
+      const gc=document.getElementById('wtCanvas');if(!gc)return;
+      const cv=document.createElement('canvas');
+      cv.width=340;cv.height=240;gc.appendChild(cv);
+      const controls=document.createElement('div');
+      controls.className='graph-controls';
+      controls.innerHTML=`
+        <button class="graph-btn active" onclick="wtToggle('asymptotes',this)">Asíntotas</button>
+        <button class="graph-btn active" onclick="wtToggle('vertices',this)">Vértices</button>
+        <button class="graph-btn active" onclick="wtToggle('foci',this)">Focos</button>
+        <button class="graph-btn" onclick="wtToggle('rect',this)">Rectángulo</button>
+        <button class="graph-btn" onclick="wtToggle('latus',this)">Lado recto</button>
+      `;
+      gc.appendChild(controls);
+      drawHyperbolaFull(cv,s.canvas.a,s.canvas.b,s.canvas.vertical||false,{asymptotes:true,vertices:true,foci:true,rect:false,latus:false});
+      cv._a=s.canvas.a;cv._b=s.canvas.b;cv._v=s.canvas.vertical||false;
+    },50);
+  }
+}
+
+let wtLayers={asymptotes:true,vertices:true,foci:true,rect:false,latus:false};
+function wtToggle(layer,btn){
+  playClick();
+  wtLayers[layer]=!wtLayers[layer];
+  btn.classList.toggle('active');
+  const cv=document.querySelector('#wtCanvas canvas');
+  if(cv)drawHyperbolaFull(cv,cv._a,cv._b,cv._v,wtLayers);
+}
+function wtNext(){playNav();state.wtStep++;render();}
+function wtPrev(){playNav();state.wtStep--;render();}
+function wtGo(i){playClick();state.wtStep=i;render();}
+
+// ═══════════════════════════════════════════════
+// HARD EXERCISES
+// ═══════════════════════════════════════════════
+function startHard(){playClick();state.mode='hard';state.hardExIdx=0;state.hardStepIdx=0;state.hardInputs={};state.hardDone={};render();}
+
+function renderHard(app){
+  const ex=HARD_EXERCISES[state.hardExIdx];
+  const step=ex.steps[state.hardStepIdx];
+  const totalSteps=ex.steps.length;
+  const pct=Math.round(state.hardStepIdx/totalSteps*100);
+  const exDone=state.hardDone[ex.id];
+
+  // Steps progress
+  const stepDots=ex.steps.map((_,i)=>{
+    const done=i<state.hardStepIdx||(i===state.hardStepIdx&&exDone);
+    const active=i===state.hardStepIdx;
+    return `<div style="width:${active?'28px':'10px'};height:10px;border-radius:5px;background:${done?'var(--correct)':active?'var(--accent)':'var(--border)'};transition:all .3s"></div>`;
+  }).join('');
+
+  const inputs=state.hardInputs[ex.id]||{};
+
+  let stepHtml='';
+  if(step.blanks){
+    stepHtml=step.blanks.map(b=>`
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+        <span style="font-size:14px;color:var(--text2);min-width:120px">${b.label}</span>
+        <input class="fill-blank${inputs[b.id]===b.ans?' correct-fill':inputs[b.id]&&inputs[b.id]!==b.ans?' wrong-fill':''}"
+          id="inp_${b.id}" value="${inputs[b.id]||''}" placeholder="${b.hint}"
+          oninput="hardInput('${ex.id}','${b.id}',this.value)"
+          style="width:160px" ${exDone?'disabled':''}/>
+        ${inputs[b.id]===b.ans?'<span style="color:var(--correct)">✓</span>':inputs[b.id]&&inputs[b.id]!==b.ans?`<span style="font-size:12px;color:var(--text2)">💡 Pista: ${b.hint}</span>`:''}
+      </div>`).join('');
+  }else if(step.choice){
+    stepHtml=step.choice.opts.map((o,i)=>`
+      <button class="opt${inputs['choice']===i?(i===step.choice.ans?' correct':' wrong'):(exDone&&i===step.choice.ans?' correct':'')}" 
+        ${exDone?'disabled':''} onclick="hardChoice('${ex.id}',${i})">
+        <span class="opt-letter">${String.fromCharCode(65+i)}</span>
+        <span>${o}</span>
+      </button>`).join('');
+  }
+
+  const allCorrect=step.blanks?step.blanks.every(b=>inputs[b.id]===b.ans)
+    :step.choice?inputs['choice']===step.choice.ans:false;
+
+  app.innerHTML=`
+  <div style="margin-bottom:12px;display:flex;gap:8px;align-items:center">
+    <button onclick="backToMenu()" style="padding:7px 14px;font-size:12px">← Menú</button>
+    <div style="flex:1;text-align:center">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:4px">Ejercicio ${state.hardExIdx+1} de ${HARD_EXERCISES.length}</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    </div>
+  </div>
+
+  <div class="question-card">
+    <div class="q-meta">
+      <span class="badge b-hard">🔥 Nivel Difícil</span>
+      <span style="font-size:12px;color:var(--text2)">Paso ${state.hardStepIdx+1}/${totalSteps}: ${step.label}</span>
+    </div>
+    <div class="q-formula" style="font-size:15px;margin-bottom:10px">${ex.equation}</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6">${ex.intro}</div>
+
+    <!-- Step progress -->
+    <div style="display:flex;gap:4px;align-items:center;margin-bottom:16px">
+      ${stepDots}
+      <span style="font-size:11px;color:var(--text3);margin-left:6px">${step.label}</span>
+    </div>
+
+    <div style="font-size:15px;font-weight:600;margin-bottom:14px;color:var(--text)">${step.task}</div>
+    <div class="${step.choice?'options options-1col':''}">
+      ${stepHtml}
+    </div>
+
+    ${allCorrect||exDone?`
+    <div class="explanation exp-right" style="display:block;margin-top:16px">
+      <div class="exp-header">✅ ¡Correcto! — ${step.label}</div>
+      <div class="exp-detail">${step.blanks?step.blanks.map(b=>`<strong>${b.label}</strong> ${b.ans}`).join(' | '):step.choice?step.choice.opts[step.choice.ans]:''}</div>
+    </div>`:''}
+
+    <div class="nav-row" style="margin-top:16px">
+      ${state.hardStepIdx>0?`<button onclick="hardPrev()">← Paso anterior</button>`:''}
+      ${state.hardStepIdx===totalSteps-1||exDone?`
+        <div id="hardGraph" style="margin:12px 0;width:100%"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;width:100%">
+          ${state.hardExIdx<HARD_EXERCISES.length-1?`<button class="primary" onclick="hardNextEx()">Siguiente ejercicio →</button>`:'<button class="primary" onclick="backToMenu()">🏠 Completado</button>'}
+        </div>`
+      :`<button class="primary" ${!allCorrect?'disabled':''} onclick="hardNextStep()">Siguiente paso →</button>`}
+    </div>
+  </div>`;
+
+  // Show graph on last step
+  if(state.hardStepIdx===totalSteps-1||exDone){
+    setTimeout(()=>{
+      const gc=document.getElementById('hardGraph');if(!gc)return;
+      const cv=document.createElement('canvas');cv.width=340;cv.height=230;gc.appendChild(cv);
+      const controls=document.createElement('div');controls.className='graph-controls';
+      controls.innerHTML=`
+        <button class="graph-btn active" onclick="hardToggle('asymptotes',this)">Asíntotas</button>
+        <button class="graph-btn active" onclick="hardToggle('vertices',this)">Vértices</button>
+        <button class="graph-btn active" onclick="hardToggle('foci',this)">Focos</button>
+        <button class="graph-btn" onclick="hardToggle('rect',this)">Rectángulo</button>
+        <button class="graph-btn" onclick="hardToggle('latus',this)">Lado recto</button>
+      `;
+      gc.appendChild(controls);
+      const g=ex.graph;
+      drawHyperbolaFull(cv,g.a,g.b,g.vertical||false,{asymptotes:true,vertices:true,foci:true});
+      cv._a=g.a;cv._b=g.b;cv._v=g.vertical||false;
+      showToast('📈 Gráfica generada — activa capas con los botones','ok',2500);
+    },100);
+  }
+}
+
+let hardGraphLayers={asymptotes:true,vertices:true,foci:true,rect:false,latus:false};
+function hardToggle(layer,btn){
+  playClick();hardGraphLayers[layer]=!hardGraphLayers[layer];btn.classList.toggle('active');
+  const cv=document.querySelector('#hardGraph canvas');
+  if(cv)drawHyperbolaFull(cv,cv._a,cv._b,cv._v,hardGraphLayers);
+}
+
+function hardInput(exId,field,val){
+  if(!state.hardInputs[exId])state.hardInputs[exId]={};
+  state.hardInputs[exId][field]=val.trim();
+  const ex=HARD_EXERCISES.find(e=>e.id===exId);
+  const step=ex.steps[state.hardStepIdx];
+  const allOk=step.blanks&&step.blanks.every(b=>state.hardInputs[exId][b.id]===b.ans);
+  if(allOk){playCorrect();showToast('✅ ¡Paso completado!','ok',1500);}
+  // Re-color inputs
+  step.blanks.forEach(b=>{
+    const inp=document.getElementById('inp_'+b.id);
+    if(!inp)return;
+    const v=state.hardInputs[exId][b.id];
+    inp.className='fill-blank'+(v===b.ans?' correct-fill':v?' wrong-fill':'');
+  });
+  if(allOk)setTimeout(render,600);
+}
+
+function hardChoice(exId,i){
+  if(!state.hardInputs[exId])state.hardInputs[exId]={};
+  state.hardInputs[exId]['choice']=i;
+  const ex=HARD_EXERCISES.find(e=>e.id===exId);
+  const step=ex.steps[state.hardStepIdx];
+  if(i===step.choice.ans){playCorrect();showToast('✅ ¡Correcto!','ok',1500);setTimeout(render,600);}
+  else{playWrong();render();}
+}
+
+function hardNextStep(){
+  playNav();
+  const ex=HARD_EXERCISES[state.hardExIdx];
+  if(state.hardStepIdx<ex.steps.length-1){
+    state.hardStepIdx++;
+    if(!state.hardInputs[ex.id])state.hardInputs[ex.id]={};
+    render();
+  }else{
+    state.hardDone[ex.id]=true;
+    showToast('🏆 ¡Ejercicio completado!','ok',3000);
+    render();
+  }
+}
+function hardPrev(){playNav();if(state.hardStepIdx>0){state.hardStepIdx--;render();}}
+function hardNextEx(){
+  playClick();
+  state.hardExIdx++;state.hardStepIdx=0;
+  if(!state.hardInputs[HARD_EXERCISES[state.hardExIdx].id])
+    state.hardInputs[HARD_EXERCISES[state.hardExIdx].id]={};
+  render();
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+render();
+</script>
+</body>
+</html>
